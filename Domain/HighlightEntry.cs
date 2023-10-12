@@ -1,12 +1,17 @@
-﻿using System.Drawing;
+﻿using Newtonsoft.Json;
+using System.Drawing;
 
 namespace Log4Merge.Domain
 {
     public class HighlightEntry
     {
-        public string Pattern { get; }
-        public Color BackColor { get; }
-        public Color ForeColor { get; }
+        public string Pattern { get; set; }
+
+        [JsonConverter(typeof(ColorJsonConverter))]
+        public Color BackColor { get; set; }
+
+        [JsonConverter(typeof(ColorJsonConverter))]
+        public Color ForeColor { get; set; }
 
         public HighlightEntry(
             string pattern,

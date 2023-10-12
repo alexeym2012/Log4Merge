@@ -30,26 +30,32 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formMainForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.gridLogsViewer = new System.Windows.Forms.DataGridView();
+            this.columnCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.columnTimeStamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.columnSourceFileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.columnLineNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.columnTimeInvisible = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.columnMessage = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelLines = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.openLog4netLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.appendLog4netLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.highlightingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openLog4netLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.columnMessage = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnTimeInvisible = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnLineNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnSourceFileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnTimeStamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.gridLogsViewer = new System.Windows.Forms.DataGridView();
-            this.appendLog4netLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contributeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -64,130 +70,9 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 1001F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1169, 1001);
             this.tableLayoutPanel1.TabIndex = 0;
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabelLines});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 975);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1169, 26);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripStatusLabelLines
-            // 
-            this.toolStripStatusLabelLines.Name = "toolStripStatusLabelLines";
-            this.toolStripStatusLabelLines.Size = new System.Drawing.Size(57, 20);
-            this.toolStripStatusLabelLines.Text = "Lines: 0";
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
-            this.toolStripMenuItem2});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1169, 28);
-            this.menuStrip1.TabIndex = 2;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openLog4netLogsToolStripMenuItem,
-            this.appendLog4netLogsToolStripMenuItem});
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(46, 24);
-            this.toolStripMenuItem1.Text = "File";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.highlightingToolStripMenuItem});
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(99, 24);
-            this.toolStripMenuItem2.Text = "Preferences";
-            // 
-            // highlightingToolStripMenuItem
-            // 
-            this.highlightingToolStripMenuItem.Name = "highlightingToolStripMenuItem";
-            this.highlightingToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.highlightingToolStripMenuItem.Text = "Highlighting...";
-            this.highlightingToolStripMenuItem.Click += new System.EventHandler(this.highlightingToolStripMenuItem_Click);
-            // 
-            // openLog4netLogsToolStripMenuItem
-            // 
-            this.openLog4netLogsToolStripMenuItem.Name = "openLog4netLogsToolStripMenuItem";
-            this.openLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(244, 26);
-            this.openLog4netLogsToolStripMenuItem.Text = "Open Log4net logs...";
-            this.openLog4netLogsToolStripMenuItem.Click += new System.EventHandler(this.openLog4netLogsToolStripMenuItem_Click);
-            // 
-            // columnMessage
-            // 
-            this.columnMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.columnMessage.DataPropertyName = "Message";
-            this.columnMessage.HeaderText = "Log Message";
-            this.columnMessage.MaxInputLength = 200000000;
-            this.columnMessage.MinimumWidth = 6;
-            this.columnMessage.Name = "columnMessage";
-            this.columnMessage.ReadOnly = true;
-            // 
-            // columnTimeInvisible
-            // 
-            this.columnTimeInvisible.DataPropertyName = "TimeStamp";
-            this.columnTimeInvisible.FillWeight = 2F;
-            this.columnTimeInvisible.HeaderText = "columnTimeInvisible";
-            this.columnTimeInvisible.MinimumWidth = 2;
-            this.columnTimeInvisible.Name = "columnTimeInvisible";
-            this.columnTimeInvisible.ReadOnly = true;
-            this.columnTimeInvisible.Visible = false;
-            this.columnTimeInvisible.Width = 2;
-            // 
-            // columnLineNumber
-            // 
-            this.columnLineNumber.DataPropertyName = "LineNumber";
-            this.columnLineNumber.FillWeight = 50F;
-            this.columnLineNumber.HeaderText = "Line";
-            this.columnLineNumber.MinimumWidth = 6;
-            this.columnLineNumber.Name = "columnLineNumber";
-            this.columnLineNumber.ReadOnly = true;
-            this.columnLineNumber.Width = 50;
-            // 
-            // columnSourceFileName
-            // 
-            this.columnSourceFileName.DataPropertyName = "SourceFileName";
-            this.columnSourceFileName.HeaderText = "Source File";
-            this.columnSourceFileName.MinimumWidth = 6;
-            this.columnSourceFileName.Name = "columnSourceFileName";
-            this.columnSourceFileName.ReadOnly = true;
-            this.columnSourceFileName.Width = 125;
-            // 
-            // columnTimeStamp
-            // 
-            this.columnTimeStamp.DataPropertyName = "TimeStampAsText";
-            this.columnTimeStamp.FillWeight = 130F;
-            this.columnTimeStamp.HeaderText = "TimeStamp";
-            this.columnTimeStamp.MinimumWidth = 6;
-            this.columnTimeStamp.Name = "columnTimeStamp";
-            this.columnTimeStamp.ReadOnly = true;
-            this.columnTimeStamp.Width = 130;
-            // 
-            // columnCheckbox
-            // 
-            this.columnCheckbox.FillWeight = 30F;
-            this.columnCheckbox.Frozen = true;
-            this.columnCheckbox.HeaderText = "";
-            this.columnCheckbox.MinimumWidth = 6;
-            this.columnCheckbox.Name = "columnCheckbox";
-            this.columnCheckbox.ReadOnly = true;
-            this.columnCheckbox.Visible = false;
-            this.columnCheckbox.Width = 30;
             // 
             // gridLogsViewer
             // 
@@ -225,12 +110,171 @@
             this.gridLogsViewer.RowPrePaint += new System.Windows.Forms.DataGridViewRowPrePaintEventHandler(this.gridLogsViewer_RowPrePaint);
             this.gridLogsViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gridLogsViewer_KeyDown);
             // 
+            // columnCheckbox
+            // 
+            this.columnCheckbox.FillWeight = 30F;
+            this.columnCheckbox.Frozen = true;
+            this.columnCheckbox.HeaderText = "";
+            this.columnCheckbox.MinimumWidth = 6;
+            this.columnCheckbox.Name = "columnCheckbox";
+            this.columnCheckbox.ReadOnly = true;
+            this.columnCheckbox.Visible = false;
+            this.columnCheckbox.Width = 30;
+            // 
+            // columnTimeStamp
+            // 
+            this.columnTimeStamp.DataPropertyName = "TimeStampAsText";
+            this.columnTimeStamp.FillWeight = 130F;
+            this.columnTimeStamp.HeaderText = "TimeStamp";
+            this.columnTimeStamp.MinimumWidth = 6;
+            this.columnTimeStamp.Name = "columnTimeStamp";
+            this.columnTimeStamp.ReadOnly = true;
+            this.columnTimeStamp.Width = 130;
+            // 
+            // columnSourceFileName
+            // 
+            this.columnSourceFileName.DataPropertyName = "SourceFileName";
+            this.columnSourceFileName.HeaderText = "Source File";
+            this.columnSourceFileName.MinimumWidth = 6;
+            this.columnSourceFileName.Name = "columnSourceFileName";
+            this.columnSourceFileName.ReadOnly = true;
+            this.columnSourceFileName.Width = 125;
+            // 
+            // columnLineNumber
+            // 
+            this.columnLineNumber.DataPropertyName = "LineNumber";
+            this.columnLineNumber.FillWeight = 50F;
+            this.columnLineNumber.HeaderText = "Line";
+            this.columnLineNumber.MinimumWidth = 6;
+            this.columnLineNumber.Name = "columnLineNumber";
+            this.columnLineNumber.ReadOnly = true;
+            this.columnLineNumber.Width = 50;
+            // 
+            // columnTimeInvisible
+            // 
+            this.columnTimeInvisible.DataPropertyName = "TimeStamp";
+            this.columnTimeInvisible.FillWeight = 2F;
+            this.columnTimeInvisible.HeaderText = "columnTimeInvisible";
+            this.columnTimeInvisible.MinimumWidth = 2;
+            this.columnTimeInvisible.Name = "columnTimeInvisible";
+            this.columnTimeInvisible.ReadOnly = true;
+            this.columnTimeInvisible.Visible = false;
+            this.columnTimeInvisible.Width = 2;
+            // 
+            // columnMessage
+            // 
+            this.columnMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.columnMessage.DataPropertyName = "Message";
+            this.columnMessage.HeaderText = "Log Message";
+            this.columnMessage.MaxInputLength = 200000000;
+            this.columnMessage.MinimumWidth = 6;
+            this.columnMessage.Name = "columnMessage";
+            this.columnMessage.ReadOnly = true;
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelLines});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 975);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1169, 26);
+            this.statusStrip1.TabIndex = 1;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabelLines
+            // 
+            this.toolStripStatusLabelLines.Name = "toolStripStatusLabelLines";
+            this.toolStripStatusLabelLines.Size = new System.Drawing.Size(57, 20);
+            this.toolStripStatusLabelLines.Text = "Lines: 0";
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2,
+            this.aboutToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1169, 28);
+            this.menuStrip1.TabIndex = 2;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openLog4netLogsToolStripMenuItem,
+            this.appendLog4netLogsToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.exitToolStripMenuItem});
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(46, 24);
+            this.toolStripMenuItem1.Text = "File";
+            // 
+            // openLog4netLogsToolStripMenuItem
+            // 
+            this.openLog4netLogsToolStripMenuItem.Name = "openLog4netLogsToolStripMenuItem";
+            this.openLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(244, 26);
+            this.openLog4netLogsToolStripMenuItem.Text = "Open Log4net logs...";
+            this.openLog4netLogsToolStripMenuItem.Click += new System.EventHandler(this.openLog4netLogsToolStripMenuItem_Click);
+            // 
             // appendLog4netLogsToolStripMenuItem
             // 
             this.appendLog4netLogsToolStripMenuItem.Name = "appendLog4netLogsToolStripMenuItem";
             this.appendLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(244, 26);
             this.appendLog4netLogsToolStripMenuItem.Text = "Append Log4net logs...";
             this.appendLog4netLogsToolStripMenuItem.Click += new System.EventHandler(this.appendLog4netLogsToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.highlightingToolStripMenuItem});
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(99, 24);
+            this.toolStripMenuItem2.Text = "Preferences";
+            // 
+            // highlightingToolStripMenuItem
+            // 
+            this.highlightingToolStripMenuItem.Name = "highlightingToolStripMenuItem";
+            this.highlightingToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.highlightingToolStripMenuItem.Text = "Highlighting...";
+            this.highlightingToolStripMenuItem.Click += new System.EventHandler(this.highlightingToolStripMenuItem_Click);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contributeMenuItem,
+            this.aboutToolStripMenuItem1});
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(55, 24);
+            this.aboutToolStripMenuItem.Text = "Help";
+            // 
+            // contributeMenuItem
+            // 
+            this.contributeMenuItem.Name = "contributeMenuItem";
+            this.contributeMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.contributeMenuItem.Text = "Contribute";
+            this.contributeMenuItem.Click += new System.EventHandler(this.contributeMenuItem_Click);
+            // 
+            // aboutToolStripMenuItem1
+            // 
+            this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            this.aboutToolStripMenuItem1.Text = "About";
+            this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(241, 6);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(244, 26);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // formMainForm
             // 
@@ -240,16 +284,17 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "formMainForm";
             this.Text = "Log4Merge";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.tableLayoutPanel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -273,6 +318,11 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn columnTimeInvisible;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnMessage;
         private System.Windows.Forms.ToolStripMenuItem appendLog4netLogsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem contributeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }
 }
 

@@ -23,7 +23,7 @@ namespace Log4Merge
         public formMainForm()
         {
             InitializeComponent();
-            _highlightEntries.Add(new HighlightEntry("Edge Health Report", Color.Yellow, Color.Red));
+            this.Text = $"{this.Text} {GetAssemblyVersion()}";
         }
 
         private void btnChooseLogFiles_Click(object sender, EventArgs e)
@@ -124,6 +124,8 @@ namespace Log4Merge
             var hightPreferencesDialog = new HighlightPreferencesDialog(this._highlightEntries);
             if (hightPreferencesDialog.ShowDialog() == DialogResult.OK)
             {
+                _logEntries = new BindingList<LogEntry>(_logEntries.ToList().OrderBy(l => l.TimeStamp).ToList());
+                BindLogViewerDataGrip();
             }
         }
 
@@ -179,7 +181,32 @@ namespace Log4Merge
 
         private void appendLog4netLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            
+
             OpenFilesDialog(false);
+        }
+
+        private void contributeMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/alexeym2012/Log4Merge");
+        }
+
+        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.ShowDialog();
+        }
+
+        private string GetAssemblyVersion()
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            return fvi.FileVersion;
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Dispose(true);
         }
     }
 }
