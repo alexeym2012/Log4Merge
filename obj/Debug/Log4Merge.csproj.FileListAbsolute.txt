@@ -1,0 +1,12 @@
+C:\Users\alexe\source\repos\Log4Merge\bin\Debug\Log4Merge.exe.config
+C:\Users\alexe\source\repos\Log4Merge\bin\Debug\Log4Merge.exe
+C:\Users\alexe\source\repos\Log4Merge\bin\Debug\Log4Merge.pdb
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.csproj.AssemblyReference.cache
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.csproj.SuggestedBindingRedirects.cache
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.Properties.Resources.resources
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.csproj.GenerateResource.cache
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.csproj.CoreCompileInputs.cache
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.exe
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.pdb
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.formMainForm.resources
+C:\Users\alexe\source\repos\Log4Merge\obj\Debug\Log4Merge.HighlightPreferencesDialog.resources
