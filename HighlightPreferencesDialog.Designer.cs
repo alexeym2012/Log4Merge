@@ -135,9 +135,9 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(75, 571);
+            this.label1.Location = new System.Drawing.Point(60, 457);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(100, 80);
+            this.label1.Size = new System.Drawing.Size(80, 64);
             this.label1.TabIndex = 4;
             this.label1.Text = "                     Foreground:\r\n\r\nRegex:";
             // 

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Log4Merge.Domain;
+using Newtonsoft.Json;
 
 namespace Log4Merge
 {
@@ -74,6 +75,7 @@ namespace Log4Merge
         private void BindLogViewerDataGrip()
         {
             gridLogsViewer.DataSource = _logEntries;
+            saveAsToolStripMenuItem.Enabled = _logEntries.Count > 0;
             BindToolStrip();
             if (_highlightEntries.Count > 0)
             {
@@ -109,36 +111,6 @@ namespace Log4Merge
 
                 BindToolStrip();
             }
-        }
-
-        private void gridLogsViewer_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.RowIndex > 0)
-            {
-                gridLogsViewer.Rows[e.RowIndex].Selected = true;
-            }
-        }
-
-        private void gridLogsViewer_RowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
-        {
-            //foreach (var highlightEntry in this._highlightEntries)
-            //{
-            //    var message = _logEntries[e.RowIndex].Message;
-
-            //    if (highlightEntry.IsMatch(message))
-            //    {
-            //        if (gridLogsViewer.Rows[e.RowIndex].DefaultCellStyle.BackColor != highlightEntry.BackColor)
-            //        {
-            //            gridLogsViewer.Rows[e.RowIndex].DefaultCellStyle.BackColor = highlightEntry.BackColor;
-            //        }
-
-            //        if (gridLogsViewer.Rows[e.RowIndex].DefaultCellStyle.ForeColor != highlightEntry.ForeColor)
-            //        {
-            //            gridLogsViewer.Rows[e.RowIndex].DefaultCellStyle.ForeColor = highlightEntry.ForeColor;
-            //        }
-
-            //    }
-            //}
         }
 
         private void highlightingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -350,6 +322,20 @@ namespace Log4Merge
             }
 
             Clipboard.SetText(sb.ToString());
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "All files|*.*";
+            saveFileDialog.Title = "Save Logs To File";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                if (saveFileDialog.FileName != "")
+                {
+                    File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}")));
+                }
+            }
         }
     }
 }
