@@ -12,6 +12,8 @@ namespace Log4Merge.Domain
         public long LineNumber { get; }
         public DateTime TimeStamp { get; }
         public string Message { get; private set; }
+        public string ShortMessage { get; set; }
+
         
 
         public string TimeStampAsText => TimeStamp.ToString(@"yyyy-MM-dd HH:mm:ss,fff");
@@ -27,11 +29,19 @@ namespace Log4Merge.Domain
             LineNumber = lineNumber;
             TimeStamp = timeStamp;
             Message = message;
+            
+            ShortMessage = Message;
+
+            if (Message.Length > 100)
+            {
+                ShortMessage = Message.Substring(0, 100);
+            }
+
         }
 
         public void AppendMessage(string message)
         {
-            this.Message += $"\nmessage";
+            this.Message += $"\n{message}";
         }
     }
 }

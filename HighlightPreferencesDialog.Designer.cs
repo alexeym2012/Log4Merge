@@ -102,6 +102,7 @@
             // 
             // btnCancel
             // 
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnCancel.Location = new System.Drawing.Point(289, 612);
             this.btnCancel.Name = "btnCancel";
@@ -124,7 +125,7 @@
             this.btnAddPattern.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnAddPattern.Location = new System.Drawing.Point(432, 524);
             this.btnAddPattern.Name = "btnAddPattern";
-            this.btnAddPattern.Size = new System.Drawing.Size(139, 28);
+            this.btnAddPattern.Size = new System.Drawing.Size(139, 35);
             this.btnAddPattern.TabIndex = 3;
             this.btnAddPattern.Text = "Add";
             this.btnAddPattern.UseVisualStyleBackColor = true;
@@ -132,13 +133,13 @@
             // 
             // label1
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(60, 469);
+            this.label1.Location = new System.Drawing.Point(75, 571);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(80, 16);
+            this.label1.Size = new System.Drawing.Size(100, 80);
             this.label1.TabIndex = 4;
-            this.label1.Text = "Foreground:";
+            this.label1.Text = "                     Foreground:\r\n\r\nRegex:";
             // 
             // label2
             // 
