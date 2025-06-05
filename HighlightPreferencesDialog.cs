@@ -27,8 +27,11 @@ namespace Log4Merge
 
         private void btnAddPattern_Click(object sender, EventArgs e)
         {
-            _highlightEntries.Add(new HighlightEntry(txtPattern.Text, Color.Transparent, Color.Black));
-       
+            var newHighlightEntry = new HighlightEntry(txtPattern.Text, btnChooseBackColor.BackColor, btnChooseTextColor.BackColor);
+            _highlightEntries.Add(newHighlightEntry);
+
+            this.lstHighlights.ClearSelected();
+            this.lstHighlights.SelectedItem = newHighlightEntry;
         }
 
         private void btnRemove_Click(object sender, EventArgs e)

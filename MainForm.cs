@@ -27,55 +27,11 @@ namespace Log4Merge
             this.Text = $"{this.Text} {GetAssemblyVersion()}";
         }
 
-        private void btnChooseLogFiles_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog d = new OpenFileDialog();
-            d.Multiselect = true;
-            d.InitialDirectory = @"C:\tmp\logs-test\sideGall";
-            if (d.ShowDialog() == DialogResult.OK)
-            {
-                _logEntries.Clear();
-                foreach (var logFileName in d.FileNames)
-                {
-
-                    var logLines = System.IO.File.ReadAllLines(logFileName, Encoding.UTF8);
-
-                    for (var i = 0; i < logLines.Length; i++)
-                    {
-                        var logLine = logLines[i];
-                        if (logLine.Length < 23)
-                        {
-                            _logEntries.Last()?.AppendMessage(logLine);
-                        }
-                        else
-                        {
-                            var timeString = logLine.Substring(0, 23);
-                            var message = logLine.Substring(23);
-                            if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.AssumeUniversal, out var timeStamp))
-                            {
-                                _logEntries.Add(new LogEntry(logFileName, i + 1, timeStamp, message));
-                            }
-                            else
-                            {
-                                _logEntries.Last()?.AppendMessage(logLine);
-                            }
-                        }
-                    }
-
-                }
-
-                _logEntries = new BindingList<LogEntry>(_logEntries.ToList().OrderBy(l => l.TimeStamp).ToList());
-                BindLogViewerDataGrip();
-
-
-            }
-        }
 
         private void BindLogViewerDataGrip()
         {
             gridLogsViewer.DataSource = _logEntries;
-            saveAsToolStripMenuItem.Enabled = _logEntries.Count > 0;
+            saveAsToolStripMenuItem.Enabled = saveAsLogToolStripMenuItem.Enabled = _logEntries.Count > 0;
             BindToolStrip();
             if (_highlightEntries.Count > 0)
             {
@@ -159,7 +115,7 @@ namespace Log4Merge
                             if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
                                     DateTimeStyles.AssumeUniversal, out var timeStamp))
                             {
-                                _logEntries.Add(new LogEntry(logFileName, i + 1, timeStamp, message));
+                                _logEntries.Add(new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message));
                             }
                             else
                             {
@@ -283,6 +239,15 @@ namespace Log4Merge
                 //_logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message;
             }
         }
+        
+        private void gridLogsViewer_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > 0 && e.ColumnIndex == 4)
+            {
+                
+                _logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message.Substring(0, Math.Min(_logEntries[e.RowIndex].ShortMessage.Length +20, _logEntries[e.RowIndex].Message.Length));
+            }
+        }
 
         private void toolStripMenuRemoveText_Click(object sender, EventArgs e)
         {
@@ -334,6 +299,20 @@ namespace Log4Merge
                 if (saveFileDialog.FileName != "")
                 {
                     File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}")));
+                }
+            }
+        }
+
+        private void saveAsLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Log4New|*.log";
+            saveFileDialog.Title = "Save Logs To File";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                if (saveFileDialog.FileName != "")
+                {
+                    File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText} {l.Message}")));
                 }
             }
         }
