@@ -111,7 +111,7 @@ namespace Log4Merge
                         {
                             var timeString = logLine.Substring(0, 23);
                             var message = logLine.Substring(23);
-                            
+
                             if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
                                     DateTimeStyles.AssumeUniversal, out var timeStamp))
                             {
@@ -196,7 +196,7 @@ namespace Log4Merge
             if (gridLogsViewer.SelectedRows.Count > 0)
             {
                 var items = new List<LogEntry>();
-                
+
                 foreach (DataGridViewRow selectedRow in gridLogsViewer.SelectedRows)
                 {
                     items.Add(selectedRow.DataBoundItem as LogEntry);
@@ -206,7 +206,7 @@ namespace Log4Merge
                 BindLogViewerDataGrip();
 
             }
-            
+
         }
 
         private void removeHighlightedToolStripMenuItem_Click(object sender, EventArgs e)
@@ -239,20 +239,20 @@ namespace Log4Merge
                 //_logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message;
             }
         }
-        
+
         private void gridLogsViewer_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > 0 && e.ColumnIndex == 4)
             {
-                
-                _logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message.Substring(0, Math.Min(_logEntries[e.RowIndex].ShortMessage.Length +20, _logEntries[e.RowIndex].Message.Length));
+
+                _logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message.Substring(0, Math.Min(_logEntries[e.RowIndex].ShortMessage.Length + 20, _logEntries[e.RowIndex].Message.Length));
             }
         }
 
         private void toolStripMenuRemoveText_Click(object sender, EventArgs e)
         {
 
-            var textToRemove = Microsoft.VisualBasic.Interaction.InputBox("Remove rows which contain the text:",
+            var textToRemove = Microsoft.VisualBasic.Interaction.InputBox("Remove rows which contain the text:\nCan be split by '|'",
                 "Remove rows",
                 "",
                 0,
@@ -260,12 +260,30 @@ namespace Log4Merge
 
             if (string.IsNullOrWhiteSpace(textToRemove) == false)
             {
-                var items = _logEntries.ToList()
-                    .Where(l => l.Message.ToLower().Contains(textToRemove.Trim().ToLower()) == false).ToList();
+                var logEntries = _logEntries.ToList();
+                var filteredEntries = new List<LogEntry>();
+                var removePatterns = new HashSet<string>(textToRemove.Trim().ToLower().Split('|'));
 
-                _logEntries = new BindingList<LogEntry>(items.Distinct().ToList());
+                foreach (var logEntry in logEntries)
+                {
+                    bool shouldRemove = false;
+                    foreach (var removePattern in removePatterns)
+                    {
+                        if (logEntry.Message.ToLower().Contains(removePattern.Trim()))
+                        {
+                            shouldRemove = true;
+                            break;
+                        }
+                    }
+
+                    if (shouldRemove == false)
+                    {
+                        filteredEntries.Add(logEntry);
+                    }
+                }
+
+                _logEntries = new BindingList<LogEntry>(filteredEntries.Distinct().ToList());
                 BindLogViewerDataGrip();
-
             }
         }
 
@@ -315,6 +333,29 @@ namespace Log4Merge
                     File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText} {l.Message}")));
                 }
             }
+        }
+
+        private void toolStripMenuItemRemoveBefore_Click(object sender, EventArgs e)
+        {
+            if (gridLogsViewer.SelectedRows.Count > 0)
+            {
+                var selectedLogEntry = gridLogsViewer.SelectedRows[0].DataBoundItem as LogEntry;
+
+                _logEntries = new BindingList<LogEntry>(_logEntries.Where(l => l.TimeStamp >= selectedLogEntry.TimeStamp).Distinct().OrderBy(l => l.TimeStamp).ToList());
+                BindLogViewerDataGrip();
+            }
+        }
+
+        private void toolStripMenuItemRemoveAfter_Click(object sender, EventArgs e)
+        {
+            if (gridLogsViewer.SelectedRows.Count > 0)
+            {
+                var selectedLogEntry = gridLogsViewer.SelectedRows[0].DataBoundItem as LogEntry;
+
+                _logEntries = new BindingList<LogEntry>(_logEntries.Where(l => l.TimeStamp <= selectedLogEntry.TimeStamp).Distinct().OrderBy(l => l.TimeStamp).ToList());
+                BindLogViewerDataGrip();
+            }
+
         }
     }
 }
