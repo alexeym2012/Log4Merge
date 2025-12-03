@@ -15,16 +15,32 @@ using Newtonsoft.Json;
 
 namespace Log4Merge
 {
-    public partial class formMainForm : Form
+    public partial class FormMainForm : Form
     {
         private BindingList<LogEntry> _logEntries = new BindingList<LogEntry>();
 
 
         private BindingList<HighlightEntry> _highlightEntries = new BindingList<HighlightEntry>();
-        public formMainForm()
+        public FormMainForm(string[] args)
         {
             InitializeComponent();
+
             this.Text = $"{this.Text} {GetAssemblyVersion()}";
+            
+            
+            if (args != null && args.Length > 0)
+            {
+                //MessageBox.Show(string.Join("\n", args), "Files Passed");
+                
+                
+                foreach (var logFileName in args)
+                {
+                    AppendLogsFromTheFile(logFileName);
+                }
+
+                _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
+                BindLogViewerDataGrip();
+            }
         }
 
 
@@ -98,35 +114,40 @@ namespace Log4Merge
 
                 foreach (var logFileName in d.FileNames)
                 {
-                    var logLines = System.IO.File.ReadAllLines(logFileName, Encoding.UTF8);
-
-                    for (var i = 0; i < logLines.Length; i++)
-                    {
-                        var logLine = logLines[i];
-                        if (logLine.Length < 23)
-                        {
-                            _logEntries.Last()?.AppendMessage(logLine);
-                        }
-                        else
-                        {
-                            var timeString = logLine.Substring(0, 23);
-                            var message = logLine.Substring(23);
-
-                            if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.AssumeUniversal, out var timeStamp))
-                            {
-                                _logEntries.Add(new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message));
-                            }
-                            else
-                            {
-                                _logEntries.Last()?.AppendMessage(logLine);
-                            }
-                        }
-                    }
+                    AppendLogsFromTheFile(logFileName);
                 }
 
                 _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
                 BindLogViewerDataGrip();
+            }
+        }
+
+        private void AppendLogsFromTheFile(string logFileName)
+        {
+            var logLines = System.IO.File.ReadAllLines(logFileName, Encoding.UTF8);
+
+            for (var i = 0; i < logLines.Length; i++)
+            {
+                var logLine = logLines[i];
+                if (logLine.Length < 23)
+                {
+                    _logEntries.Last()?.AppendMessage(logLine);
+                }
+                else
+                {
+                    var timeString = logLine.Substring(0, 23);
+                    var message = logLine.Substring(23);
+
+                    if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal, out var timeStamp))
+                    {
+                        _logEntries.Add(new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message));
+                    }
+                    else
+                    {
+                        _logEntries.Last()?.AppendMessage(logLine);
+                    }
+                }
             }
         }
 
@@ -316,7 +337,14 @@ namespace Log4Merge
             {
                 if (saveFileDialog.FileName != "")
                 {
-                    File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}")));
+                    
+                    using (var writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        foreach (var l in _logEntries)
+                            writer.WriteLine($"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}");
+                    }
+                    
+                    //File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}")));
                 }
             }
         }
@@ -330,7 +358,13 @@ namespace Log4Merge
             {
                 if (saveFileDialog.FileName != "")
                 {
-                    File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText} {l.Message}")));
+                    using (var writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        foreach (var l in _logEntries)
+                            writer.WriteLine($"{l.TimeStampAsText} {l.Message}");
+                    }
+
+                    //File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText} {l.Message}")));
                 }
             }
         }
