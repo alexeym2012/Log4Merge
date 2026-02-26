@@ -18,7 +18,7 @@ namespace Log4Merge
     public partial class FormMainForm : Form
     {
         private BindingList<LogEntry> _logEntries = new BindingList<LogEntry>();
-
+        private string _filterText = string.Empty;
 
         private BindingList<HighlightEntry> _highlightEntries = new BindingList<HighlightEntry>();
         public FormMainForm(string[] args)
@@ -48,7 +48,6 @@ namespace Log4Merge
         {
             gridLogsViewer.DataSource = _logEntries;
             saveAsToolStripMenuItem.Enabled = saveAsLogToolStripMenuItem.Enabled = _logEntries.Count > 0;
-            BindToolStrip();
             if (_highlightEntries.Count > 0)
             {
                 for (var i = 0; i < _logEntries.Count; i++)
@@ -65,11 +64,22 @@ namespace Log4Merge
                     }
                 }
             }
+            ApplyFilter();
+            BindToolStrip();
         }
 
         private void BindToolStrip()
         {
-            toolStripStatusLabelLines.Text = $"Lines: {gridLogsViewer.Rows.Count}";
+            var total = gridLogsViewer.Rows.Count;
+            if (!string.IsNullOrWhiteSpace(_filterText))
+            {
+                var visible = gridLogsViewer.Rows.Cast<DataGridViewRow>().Count(r => r.Visible);
+                toolStripStatusLabelLines.Text = $"Lines: {visible} / {total} (filtered)";
+            }
+            else
+            {
+                toolStripStatusLabelLines.Text = $"Lines: {total}";
+            }
         }
 
         private void gridLogsViewer_KeyDown(object sender, KeyEventArgs e)
@@ -390,6 +400,89 @@ namespace Log4Merge
                 BindLogViewerDataGrip();
             }
 
+        }
+
+        private void ApplyFilter()
+        {
+            // DataGridView throws if you hide the currently active row, so clear it first.
+            gridLogsViewer.CurrentCell = null;
+
+            if (string.IsNullOrWhiteSpace(_filterText))
+            {
+                foreach (DataGridViewRow row in gridLogsViewer.Rows)
+                    row.Visible = true;
+                return;
+            }
+
+            var patterns = _filterText.ToLower()
+                .Split('|')
+                .Select(p => p.Trim())
+                .Where(p => p.Length > 0)
+                .ToArray();
+
+            foreach (DataGridViewRow row in gridLogsViewer.Rows)
+            {
+                var entry = row.DataBoundItem as LogEntry;
+                if (entry == null) { row.Visible = true; continue; }
+                row.Visible = patterns.Any(p => entry.Message.ToLower().Contains(p));
+            }
+        }
+
+        private void btnFilter_Click(object sender, EventArgs e)
+        {
+            _filterText = filterTextBox.Text.Trim();
+            ApplyFilter();
+            BindToolStrip();
+        }
+
+        private void btnClearFilter_Click(object sender, EventArgs e)
+        {
+            filterDebounceTimer.Stop();
+            filterTextBox.Clear();
+            _filterText = string.Empty;
+            ApplyFilter();
+            BindToolStrip();
+        }
+
+        private void filterTextBox_TextChanged(object sender, EventArgs e)
+        {
+            filterDebounceTimer.Stop();
+            filterDebounceTimer.Start();
+        }
+
+        private void filterDebounceTimer_Tick(object sender, EventArgs e)
+        {
+            filterDebounceTimer.Stop();
+            _filterText = filterTextBox.Text.Trim();
+            ApplyFilter();
+            BindToolStrip();
+        }
+
+        private void filterTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                btnFilter_Click(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                btnClearFilter_Click(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.F))
+            {
+                filterTextBox.Focus();
+                filterTextBox.SelectAll();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }

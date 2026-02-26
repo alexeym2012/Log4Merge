@@ -68,11 +68,18 @@
             this.toolStripMenuItemRemoveBefore = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemRemoveAfter = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.filterPanel = new System.Windows.Forms.Panel();
+            this.lblFilter = new System.Windows.Forms.Label();
+            this.filterTextBox = new System.Windows.Forms.TextBox();
+            this.btnFilter = new System.Windows.Forms.Button();
+            this.btnClearFilter = new System.Windows.Forms.Button();
+            this.filterDebounceTimer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).BeginInit();
             this.ctxGridMenu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.filterPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -409,13 +416,69 @@
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(204, 6);
-            // 
+            //
+            // filterPanel
+            //
+            this.filterPanel.Controls.Add(this.btnClearFilter);
+            this.filterPanel.Controls.Add(this.btnFilter);
+            this.filterPanel.Controls.Add(this.filterTextBox);
+            this.filterPanel.Controls.Add(this.lblFilter);
+            this.filterPanel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.filterPanel.Height = 32;
+            this.filterPanel.Name = "filterPanel";
+            this.filterPanel.TabIndex = 10;
+            //
+            // lblFilter
+            //
+            this.lblFilter.AutoSize = true;
+            this.lblFilter.Location = new System.Drawing.Point(5, 8);
+            this.lblFilter.Name = "lblFilter";
+            this.lblFilter.Size = new System.Drawing.Size(45, 13);
+            this.lblFilter.TabIndex = 0;
+            this.lblFilter.Text = "Search:";
+            //
+            // filterTextBox
+            //
+            this.filterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.filterTextBox.Location = new System.Drawing.Point(56, 5);
+            this.filterTextBox.Name = "filterTextBox";
+            this.filterTextBox.Size = new System.Drawing.Size(700, 22);
+            this.filterTextBox.TabIndex = 1;
+            this.filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.filterTextBox_KeyDown);
+            this.filterTextBox.TextChanged += new System.EventHandler(this.filterTextBox_TextChanged);
+            //
+            // btnFilter
+            //
+            this.btnFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnFilter.Location = new System.Drawing.Point(760, 4);
+            this.btnFilter.Name = "btnFilter";
+            this.btnFilter.Size = new System.Drawing.Size(55, 24);
+            this.btnFilter.TabIndex = 2;
+            this.btnFilter.Text = "Filter";
+            this.btnFilter.Click += new System.EventHandler(this.btnFilter_Click);
+            //
+            // btnClearFilter
+            //
+            this.btnClearFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClearFilter.Location = new System.Drawing.Point(820, 4);
+            this.btnClearFilter.Name = "btnClearFilter";
+            this.btnClearFilter.Size = new System.Drawing.Size(55, 24);
+            this.btnClearFilter.TabIndex = 3;
+            this.btnClearFilter.Text = "Clear";
+            this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
+            //
+            // filterDebounceTimer
+            //
+            this.filterDebounceTimer.Interval = 400;
+            this.filterDebounceTimer.Tick += new System.EventHandler(this.filterDebounceTimer_Tick);
+            //
             // formMainForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(877, 813);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.filterPanel);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -431,6 +494,8 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.filterPanel.ResumeLayout(false);
+            this.filterPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -474,6 +539,12 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveBefore;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveAfter;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.Panel filterPanel;
+        private System.Windows.Forms.Label lblFilter;
+        private System.Windows.Forms.TextBox filterTextBox;
+        private System.Windows.Forms.Button btnFilter;
+        private System.Windows.Forms.Button btnClearFilter;
+        private System.Windows.Forms.Timer filterDebounceTimer;
     }
 }
 
