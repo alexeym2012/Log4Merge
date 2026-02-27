@@ -210,6 +210,30 @@ namespace Log4Merge
                 toolStripStatusLabelLines.Text = $"Lines: {total}";
             }
             saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetContextMenuItem.Enabled = visibleCount > 0;
+
+            // Highlighted
+            if (_highlightEntries.Count == 0)
+                toolStripStatusLabelHighlighted.Text = "Highlighted: —";
+            else
+            {
+                var highlightedCount = GetVisibleLogEntries().Count(entry => _highlightEntries.Any(he => he.IsMatch(entry.Message)));
+                toolStripStatusLabelHighlighted.Text = $"Highlighted: {highlightedCount:N0} / {visibleCount:N0}";
+            }
+
+            // Time span
+            if (_logEntries.Count == 0)
+                toolStripStatusLabelSpan.Text = "Span: —";
+            else
+            {
+                var minTs = _logEntries.Min(e => e.TimeStamp);
+                var maxTs = _logEntries.Max(e => e.TimeStamp);
+                const string fmt = "yyyy-MM-dd HH:mm";
+                toolStripStatusLabelSpan.Text = $"Span: {minTs.ToString(fmt)} — {maxTs.ToString(fmt)}";
+            }
+
+            // Source files
+            var fileCount = _logEntries.Select(e => e.SourceFileName).Distinct().Count();
+            toolStripStatusLabelFiles.Text = $"Files: {fileCount:N0}";
         }
 
         private bool IsLevelVisible(string logLevel)

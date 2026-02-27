@@ -49,6 +49,9 @@ namespace Log4Merge
             this.saveFilteredRowsAsLog4NetContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelLines = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelHighlighted = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelSpan = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelFiles = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -222,6 +225,9 @@ namespace Log4Merge
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelLines,
+            this.toolStripStatusLabelHighlighted,
+            this.toolStripStatusLabelSpan,
+            this.toolStripStatusLabelFiles,
             this.toolStripProgressBar});
             this.statusStrip1.Location = new System.Drawing.Point(0, 1172);
             this.statusStrip1.Name = "statusStrip1";
@@ -233,8 +239,27 @@ namespace Log4Merge
             // toolStripStatusLabelLines
             // 
             this.toolStripStatusLabelLines.Name = "toolStripStatusLabelLines";
-            this.toolStripStatusLabelLines.Size = new System.Drawing.Size(46, 17);
+            this.toolStripStatusLabelLines.Size = new System.Drawing.Size(1364, 17);
+            this.toolStripStatusLabelLines.Spring = true;
             this.toolStripStatusLabelLines.Text = "Lines: 0";
+            // 
+            // toolStripStatusLabelHighlighted
+            // 
+            this.toolStripStatusLabelHighlighted.Name = "toolStripStatusLabelHighlighted";
+            this.toolStripStatusLabelHighlighted.Size = new System.Drawing.Size(19, 17);
+            this.toolStripStatusLabelHighlighted.Text = "—";
+            // 
+            // toolStripStatusLabelSpan
+            // 
+            this.toolStripStatusLabelSpan.Name = "toolStripStatusLabelSpan";
+            this.toolStripStatusLabelSpan.Size = new System.Drawing.Size(19, 17);
+            this.toolStripStatusLabelSpan.Text = "—";
+            // 
+            // toolStripStatusLabelFiles
+            // 
+            this.toolStripStatusLabelFiles.Name = "toolStripStatusLabelFiles";
+            this.toolStripStatusLabelFiles.Size = new System.Drawing.Size(19, 17);
+            this.toolStripStatusLabelFiles.Text = "—";
             // 
             // toolStripProgressBar
             // 
@@ -760,6 +785,9 @@ namespace Log4Merge
         #endregion
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelLines;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelHighlighted;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelSpan;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelFiles;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
