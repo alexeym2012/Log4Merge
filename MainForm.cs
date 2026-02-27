@@ -196,7 +196,8 @@ namespace Log4Merge
         private void BindToolStrip()
         {
             var total = gridLogsViewer.Rows.Count;
-            bool isFiltered = !string.IsNullOrWhiteSpace(_filterText) || !AreAllLevelsChecked();
+            bool isFiltered = !string.IsNullOrWhiteSpace(_filterText) || !AreAllLevelsChecked() ||
+                              (dtpFrom.Checked || dtpTo.Checked);
             int visibleCount;
             if (isFiltered)
             {
@@ -555,8 +556,12 @@ namespace Log4Merge
 
             bool hasTextFilter  = patterns.Length > 0;
             bool hasLevelFilter = !AreAllLevelsChecked();
+            bool hasTimeRangeFilter = dtpFrom.Checked || dtpTo.Checked;
 
-            if (!hasTextFilter && !hasLevelFilter)
+            DateTime? fromUtc = dtpFrom.Checked ? (DateTime?)dtpFrom.Value.ToUniversalTime() : null;
+            DateTime? toUtc   = dtpTo.Checked   ? (DateTime?)dtpTo.Value.ToUniversalTime()   : null;
+
+            if (!hasTextFilter && !hasLevelFilter && !hasTimeRangeFilter)
             {
                 foreach (DataGridViewRow row in gridLogsViewer.Rows)
                     row.Visible = true;
@@ -570,7 +575,9 @@ namespace Log4Merge
 
                 bool textMatch  = !hasTextFilter  || patterns.Any(p => entry.Message.ToLower().Contains(p));
                 bool levelMatch = !hasLevelFilter || IsLevelVisible(entry.LogLevel);
-                row.Visible = textMatch && levelMatch;
+                bool timeInRange = (!fromUtc.HasValue || entry.TimeStamp >= fromUtc.Value) &&
+                                  (!toUtc.HasValue   || entry.TimeStamp <= toUtc.Value);
+                row.Visible = textMatch && levelMatch && timeInRange;
             }
         }
 
@@ -621,6 +628,20 @@ namespace Log4Merge
         }
 
         private void levelButton_CheckedChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
+            BindToolStrip();
+        }
+
+        private void btnClearTimeRange_Click(object sender, EventArgs e)
+        {
+            dtpFrom.Checked = false;
+            dtpTo.Checked = false;
+            ApplyFilter();
+            BindToolStrip();
+        }
+
+        private void dtpTimeRange_ValueChanged(object sender, EventArgs e)
         {
             ApplyFilter();
             BindToolStrip();

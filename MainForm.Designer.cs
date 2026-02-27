@@ -33,7 +33,6 @@ namespace Log4Merge
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMainForm));
             this.btnClearFilter = new System.Windows.Forms.Button();
-            this.btnFilter = new System.Windows.Forms.Button();
             this.ctxGridMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuRemoveUnhighlighted = new System.Windows.Forms.ToolStripMenuItem();
             this.removeHighlightedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -88,6 +87,11 @@ namespace Log4Merge
             this.filterPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.lblFilter = new System.Windows.Forms.Label();
             this.filterTextBox = new System.Windows.Forms.TextBox();
+            this.timeRangePanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblTimeRange = new System.Windows.Forms.Label();
+            this.dtpFrom = new System.Windows.Forms.DateTimePicker();
+            this.dtpTo = new System.Windows.Forms.DateTimePicker();
+            this.btnClearTimeRange = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ctxGridMenu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -95,28 +99,19 @@ namespace Log4Merge
             ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).BeginInit();
             this.levelFilterPanel.SuspendLayout();
             this.filterPanel.SuspendLayout();
+            this.timeRangePanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClearFilter
             // 
             this.btnClearFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClearFilter.Location = new System.Drawing.Point(430, 6);
+            this.btnClearFilter.Location = new System.Drawing.Point(53, 3);
             this.btnClearFilter.Name = "btnClearFilter";
             this.btnClearFilter.Size = new System.Drawing.Size(55, 24);
             this.btnClearFilter.TabIndex = 3;
             this.btnClearFilter.Text = "Clear";
             this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
-            // 
-            // btnFilter
-            // 
-            this.btnFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnFilter.Location = new System.Drawing.Point(491, 6);
-            this.btnFilter.Name = "btnFilter";
-            this.btnFilter.Size = new System.Drawing.Size(55, 24);
-            this.btnFilter.TabIndex = 2;
-            this.btnFilter.Text = "Filter";
-            this.btnFilter.Click += new System.EventHandler(this.btnFilter_Click);
             // 
             // ctxGridMenu
             // 
@@ -408,13 +403,13 @@ namespace Log4Merge
             this.gridLogsViewer.DefaultCellStyle = dataGridViewCellStyle2;
             this.gridLogsViewer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridLogsViewer.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.gridLogsViewer.Location = new System.Drawing.Point(0, 139);
+            this.gridLogsViewer.Location = new System.Drawing.Point(0, 197);
             this.gridLogsViewer.Margin = new System.Windows.Forms.Padding(0);
             this.gridLogsViewer.Name = "gridLogsViewer";
             this.gridLogsViewer.ReadOnly = true;
             this.gridLogsViewer.RowHeadersWidth = 51;
             this.gridLogsViewer.RowTemplate.Height = 24;
-            this.gridLogsViewer.Size = new System.Drawing.Size(1432, 1055);
+            this.gridLogsViewer.Size = new System.Drawing.Size(1432, 997);
             this.gridLogsViewer.TabIndex = 1;
             this.gridLogsViewer.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridLogsViewer_CellClick);
             this.gridLogsViewer.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridLogsViewer_CellDoubleClick);
@@ -499,8 +494,6 @@ namespace Log4Merge
             this.levelFilterPanel.Controls.Add(this.chkLevelDebug);
             this.levelFilterPanel.Controls.Add(this.chkLevelTrace);
             this.levelFilterPanel.Controls.Add(this.chkLevelOther);
-            this.levelFilterPanel.Controls.Add(this.btnClearFilter);
-            this.levelFilterPanel.Controls.Add(this.btnFilter);
             this.levelFilterPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.levelFilterPanel.Location = new System.Drawing.Point(0, 81);
             this.levelFilterPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -621,6 +614,7 @@ namespace Log4Merge
             // filterPanel
             // 
             this.filterPanel.Controls.Add(this.lblFilter);
+            this.filterPanel.Controls.Add(this.btnClearFilter);
             this.filterPanel.Controls.Add(this.filterTextBox);
             this.filterPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.filterPanel.Location = new System.Drawing.Point(3, 26);
@@ -634,37 +628,99 @@ namespace Log4Merge
             this.lblFilter.Dock = System.Windows.Forms.DockStyle.Left;
             this.lblFilter.Location = new System.Drawing.Point(3, 0);
             this.lblFilter.Name = "lblFilter";
-            this.lblFilter.Size = new System.Drawing.Size(44, 13);
+            this.lblFilter.Size = new System.Drawing.Size(44, 30);
             this.lblFilter.TabIndex = 0;
             this.lblFilter.Text = "Search:";
             // 
             // filterTextBox
             // 
             this.filterTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterTextBox.Location = new System.Drawing.Point(3, 16);
+            this.filterTextBox.Location = new System.Drawing.Point(3, 33);
             this.filterTextBox.Name = "filterTextBox";
             this.filterTextBox.Size = new System.Drawing.Size(1423, 20);
             this.filterTextBox.TabIndex = 1;
             this.filterTextBox.TextChanged += new System.EventHandler(this.filterTextBox_TextChanged);
             this.filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.filterTextBox_KeyDown);
             // 
+            // timeRangePanel
+            // 
+            this.timeRangePanel.Controls.Add(this.lblTimeRange);
+            this.timeRangePanel.Controls.Add(this.dtpFrom);
+            this.timeRangePanel.Controls.Add(this.dtpTo);
+            this.timeRangePanel.Controls.Add(this.btnClearTimeRange);
+            this.timeRangePanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.timeRangePanel.Location = new System.Drawing.Point(0, 139);
+            this.timeRangePanel.Margin = new System.Windows.Forms.Padding(0);
+            this.timeRangePanel.Name = "timeRangePanel";
+            this.timeRangePanel.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.timeRangePanel.Size = new System.Drawing.Size(1432, 58);
+            this.timeRangePanel.TabIndex = 12;
+            this.timeRangePanel.WrapContents = false;
+            // 
+            // lblTimeRange
+            // 
+            this.lblTimeRange.AutoSize = true;
+            this.lblTimeRange.Location = new System.Drawing.Point(6, 9);
+            this.lblTimeRange.Margin = new System.Windows.Forms.Padding(3, 6, 3, 0);
+            this.lblTimeRange.Name = "lblTimeRange";
+            this.lblTimeRange.Size = new System.Drawing.Size(63, 13);
+            this.lblTimeRange.TabIndex = 0;
+            this.lblTimeRange.Text = "Time range:";
+            // 
+            // dtpFrom
+            // 
+            this.dtpFrom.Checked = false;
+            this.dtpFrom.CustomFormat = "yyyy-MM-dd HH:mm";
+            this.dtpFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dtpFrom.Location = new System.Drawing.Point(74, 5);
+            this.dtpFrom.Margin = new System.Windows.Forms.Padding(2);
+            this.dtpFrom.Name = "dtpFrom";
+            this.dtpFrom.ShowCheckBox = true;
+            this.dtpFrom.Size = new System.Drawing.Size(140, 20);
+            this.dtpFrom.TabIndex = 1;
+            this.dtpFrom.ValueChanged += new System.EventHandler(this.dtpTimeRange_ValueChanged);
+            // 
+            // dtpTo
+            // 
+            this.dtpTo.Checked = false;
+            this.dtpTo.CustomFormat = "yyyy-MM-dd HH:mm";
+            this.dtpTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dtpTo.Location = new System.Drawing.Point(218, 5);
+            this.dtpTo.Margin = new System.Windows.Forms.Padding(2);
+            this.dtpTo.Name = "dtpTo";
+            this.dtpTo.ShowCheckBox = true;
+            this.dtpTo.Size = new System.Drawing.Size(140, 20);
+            this.dtpTo.TabIndex = 2;
+            this.dtpTo.ValueChanged += new System.EventHandler(this.dtpTimeRange_ValueChanged);
+            // 
+            // btnClearTimeRange
+            // 
+            this.btnClearTimeRange.Location = new System.Drawing.Point(363, 6);
+            this.btnClearTimeRange.Name = "btnClearTimeRange";
+            this.btnClearTimeRange.Size = new System.Drawing.Size(110, 24);
+            this.btnClearTimeRange.TabIndex = 3;
+            this.btnClearTimeRange.Text = "Clear time range";
+            this.btnClearTimeRange.Click += new System.EventHandler(this.btnClearTimeRange_Click);
+            // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.gridLogsViewer, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.timeRangePanel, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.gridLogsViewer, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.levelFilterPanel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.filterPanel, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowCount = 5;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 1.960784F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.901961F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.901961F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 88.23529F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.901961F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 83.33333F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1432, 1194);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -693,6 +749,8 @@ namespace Log4Merge
             this.levelFilterPanel.PerformLayout();
             this.filterPanel.ResumeLayout(false);
             this.filterPanel.PerformLayout();
+            this.timeRangePanel.ResumeLayout(false);
+            this.timeRangePanel.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -733,7 +791,6 @@ namespace Log4Merge
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveBefore;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveAfter;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.Button btnFilter;
         private System.Windows.Forms.Button btnClearFilter;
         private System.Windows.Forms.Timer filterDebounceTimer;
         private System.Windows.Forms.DataGridView gridLogsViewer;
@@ -756,6 +813,11 @@ namespace Log4Merge
         private System.Windows.Forms.FlowLayoutPanel filterPanel;
         private System.Windows.Forms.TextBox filterTextBox;
         private System.Windows.Forms.Label lblFilter;
+        private System.Windows.Forms.FlowLayoutPanel timeRangePanel;
+        private System.Windows.Forms.Label lblTimeRange;
+        private System.Windows.Forms.DateTimePicker dtpFrom;
+        private System.Windows.Forms.DateTimePicker dtpTo;
+        private System.Windows.Forms.Button btnClearTimeRange;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }

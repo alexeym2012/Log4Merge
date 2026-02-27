@@ -17,7 +17,7 @@ Parse log level (ERROR, WARN, INFO, DEBUG) from the message text and show it as 
 ## 4. Session Restore
 Remember which log files were loaded (file paths saved to `%AppData%\Log4Merge\session.json`). On startup, offer to re-open the last session. Useful when iterating on the same set of logs.
 
-## 5. Async File Loading with Progress
+## [Implemented]5. Async File Loading with Progress
 Large log files currently freeze the UI (synchronous `File.ReadAllLines`). Load files on a background thread with a progress bar in the status strip. Shows "Loading X of Y files..." during load.
 
 ## 6. Auto-Refresh / Tail Mode
@@ -32,7 +32,7 @@ A "Keep rows containing..." operation — the inverse of the current "Remove By 
 ## 9. Regex Support in Remove / Keep By Text
 Current "Remove By Text" uses simple substring matching (`.Contains()`). Allow toggling to full regex matching, consistent with the highlight system which already uses `Regex`.
 
-## 10. Time Range Picker (Non-Destructive)
+## [Implemented] 10. Time Range Picker (Non-Destructive)
 A date/time range control (two datetime pickers) in the toolbar that hides rows outside the range without removing them. Complements the current destructive "Remove Before/After Selected".
 
 ## 11. Export to HTML / CSV
