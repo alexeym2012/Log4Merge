@@ -8,5 +8,9 @@
       <Value Profile="(Default)">^\s*-\s*(ERROR|FATAL|WARN(?:ING)?|INFO|DEBUG|TRACE)\b</Value>
       <DefaultValue>^\s*-\s*(ERROR|FATAL|WARN(?:ING)?|INFO|DEBUG|TRACE)\b</DefaultValue>
     </Setting>
+    <Setting Name="TimeStampFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">yyyy-MM-dd HH:mm:ss,fff</Value>
+      <DefaultValue>yyyy-MM-dd HH:mm:ss,fff</DefaultValue>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -46,8 +46,11 @@ namespace Log4Merge
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuRemoveText = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemCopy = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveFilteredRowsAsLog4NetContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelLines = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openLog4netLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,6 +58,7 @@ namespace Log4Merge
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,86 +132,102 @@ namespace Log4Merge
             this.removeUnselectedToolStripMenuItem,
             this.toolStripSeparator3,
             this.toolStripMenuRemoveText,
-            this.toolStripMenuItemCopy});
+            this.toolStripMenuItemCopy,
+            this.toolStripSeparator6,
+            this.saveFilteredRowsAsLog4NetContextMenuItem});
             this.ctxGridMenu.Name = "ctxGridMenu";
-            this.ctxGridMenu.Size = new System.Drawing.Size(208, 198);
+            this.ctxGridMenu.Size = new System.Drawing.Size(229, 226);
             // 
             // menuRemoveUnhighlighted
             // 
             this.menuRemoveUnhighlighted.Name = "menuRemoveUnhighlighted";
-            this.menuRemoveUnhighlighted.Size = new System.Drawing.Size(207, 22);
+            this.menuRemoveUnhighlighted.Size = new System.Drawing.Size(228, 22);
             this.menuRemoveUnhighlighted.Text = "Remove Unhighlited";
             this.menuRemoveUnhighlighted.Click += new System.EventHandler(this.menuRemoveUnhighlighted_Click);
             // 
             // removeHighlightedToolStripMenuItem
             // 
             this.removeHighlightedToolStripMenuItem.Name = "removeHighlightedToolStripMenuItem";
-            this.removeHighlightedToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.removeHighlightedToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.removeHighlightedToolStripMenuItem.Text = "Remove Highlighted";
             this.removeHighlightedToolStripMenuItem.Click += new System.EventHandler(this.removeHighlightedToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(204, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(225, 6);
             // 
             // toolStripMenuItemRemoveBefore
             // 
             this.toolStripMenuItemRemoveBefore.Name = "toolStripMenuItemRemoveBefore";
-            this.toolStripMenuItemRemoveBefore.Size = new System.Drawing.Size(207, 22);
+            this.toolStripMenuItemRemoveBefore.Size = new System.Drawing.Size(228, 22);
             this.toolStripMenuItemRemoveBefore.Text = "Remove Before Selected";
             this.toolStripMenuItemRemoveBefore.Click += new System.EventHandler(this.toolStripMenuItemRemoveBefore_Click);
             // 
             // toolStripMenuItemRemoveAfter
             // 
             this.toolStripMenuItemRemoveAfter.Name = "toolStripMenuItemRemoveAfter";
-            this.toolStripMenuItemRemoveAfter.Size = new System.Drawing.Size(207, 22);
+            this.toolStripMenuItemRemoveAfter.Size = new System.Drawing.Size(228, 22);
             this.toolStripMenuItemRemoveAfter.Text = "Remove After Selected";
             this.toolStripMenuItemRemoveAfter.Click += new System.EventHandler(this.toolStripMenuItemRemoveAfter_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(204, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(225, 6);
             // 
             // removeSelectedToolStripMenuItem
             // 
             this.removeSelectedToolStripMenuItem.Name = "removeSelectedToolStripMenuItem";
-            this.removeSelectedToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.removeSelectedToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.removeSelectedToolStripMenuItem.Text = "Remove Selected";
             this.removeSelectedToolStripMenuItem.Click += new System.EventHandler(this.removeSelectedToolStripMenuItem_Click);
             // 
             // removeUnselectedToolStripMenuItem
             // 
             this.removeUnselectedToolStripMenuItem.Name = "removeUnselectedToolStripMenuItem";
-            this.removeUnselectedToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.removeUnselectedToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.removeUnselectedToolStripMenuItem.Text = "Remove Unselected";
             this.removeUnselectedToolStripMenuItem.Click += new System.EventHandler(this.removeUnselectedToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(204, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(225, 6);
             // 
             // toolStripMenuRemoveText
             // 
             this.toolStripMenuRemoveText.Name = "toolStripMenuRemoveText";
-            this.toolStripMenuRemoveText.Size = new System.Drawing.Size(207, 22);
+            this.toolStripMenuRemoveText.Size = new System.Drawing.Size(228, 22);
             this.toolStripMenuRemoveText.Text = "Remove By Text Pattern...";
             this.toolStripMenuRemoveText.Click += new System.EventHandler(this.toolStripMenuRemoveText_Click);
             // 
             // toolStripMenuItemCopy
             // 
             this.toolStripMenuItemCopy.Name = "toolStripMenuItemCopy";
-            this.toolStripMenuItemCopy.Size = new System.Drawing.Size(207, 22);
+            this.toolStripMenuItemCopy.Size = new System.Drawing.Size(228, 22);
             this.toolStripMenuItemCopy.Text = "Copy";
             this.toolStripMenuItemCopy.Click += new System.EventHandler(this.toolStripMenuItemCopy_Click);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(225, 6);
+            // 
+            // saveFilteredRowsAsLog4NetContextMenuItem
+            // 
+            this.saveFilteredRowsAsLog4NetContextMenuItem.Enabled = false;
+            this.saveFilteredRowsAsLog4NetContextMenuItem.Name = "saveFilteredRowsAsLog4NetContextMenuItem";
+            this.saveFilteredRowsAsLog4NetContextMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.saveFilteredRowsAsLog4NetContextMenuItem.Text = "Save filtered rows as Log4Net";
+            this.saveFilteredRowsAsLog4NetContextMenuItem.Click += new System.EventHandler(this.saveFilteredRowsAsLog4NetToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabelLines});
+            this.toolStripStatusLabelLines,
+            this.toolStripProgressBar});
             this.statusStrip1.Location = new System.Drawing.Point(0, 1172);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
@@ -220,6 +240,12 @@ namespace Log4Merge
             this.toolStripStatusLabelLines.Name = "toolStripStatusLabelLines";
             this.toolStripStatusLabelLines.Size = new System.Drawing.Size(46, 17);
             this.toolStripStatusLabelLines.Text = "Lines: 0";
+            // 
+            // toolStripProgressBar
+            // 
+            this.toolStripProgressBar.Name = "toolStripProgressBar";
+            this.toolStripProgressBar.Size = new System.Drawing.Size(150, 16);
+            this.toolStripProgressBar.Visible = false;
             // 
             // menuStrip1
             // 
@@ -243,6 +269,7 @@ namespace Log4Merge
             this.toolStripSeparator1,
             this.saveAsToolStripMenuItem,
             this.saveAsLogToolStripMenuItem,
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem,
             this.toolStripSeparator5,
             this.exitToolStripMenuItem});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
@@ -252,27 +279,27 @@ namespace Log4Merge
             // openLog4netLogsToolStripMenuItem
             // 
             this.openLog4netLogsToolStripMenuItem.Name = "openLog4netLogsToolStripMenuItem";
-            this.openLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.openLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.openLog4netLogsToolStripMenuItem.Text = "Open Log4net logs...";
             this.openLog4netLogsToolStripMenuItem.Click += new System.EventHandler(this.openLog4netLogsToolStripMenuItem_Click);
             // 
             // appendLog4netLogsToolStripMenuItem
             // 
             this.appendLog4netLogsToolStripMenuItem.Name = "appendLog4netLogsToolStripMenuItem";
-            this.appendLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.appendLog4netLogsToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.appendLog4netLogsToolStripMenuItem.Text = "Append Log4net logs...";
             this.appendLog4netLogsToolStripMenuItem.Click += new System.EventHandler(this.appendLog4netLogsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(193, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(225, 6);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.saveAsToolStripMenuItem.Text = "Save As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
@@ -280,19 +307,27 @@ namespace Log4Merge
             // 
             this.saveAsLogToolStripMenuItem.Enabled = false;
             this.saveAsLogToolStripMenuItem.Name = "saveAsLogToolStripMenuItem";
-            this.saveAsLogToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.saveAsLogToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.saveAsLogToolStripMenuItem.Text = "Save As Log4Net";
             this.saveAsLogToolStripMenuItem.Click += new System.EventHandler(this.saveAsLogToolStripMenuItem_Click);
+            // 
+            // saveFilteredRowsAsLog4NetToolStripMenuItem
+            // 
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = false;
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem.Name = "saveFilteredRowsAsLog4NetToolStripMenuItem";
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem.Text = "Save filtered rows as Log4Net";
+            this.saveFilteredRowsAsLog4NetToolStripMenuItem.Click += new System.EventHandler(this.saveFilteredRowsAsLog4NetToolStripMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(193, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(225, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -647,6 +682,7 @@ namespace Log4Merge
             this.Name = "FormMainForm";
             this.Text = "Log4Merge";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Shown += new System.EventHandler(this.FormMainForm_Shown);
             this.ctxGridMenu.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -666,6 +702,7 @@ namespace Log4Merge
         #endregion
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelLines;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
@@ -690,6 +727,9 @@ namespace Log4Merge
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem saveAsLogToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveFilteredRowsAsLog4NetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem saveFilteredRowsAsLog4NetContextMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveBefore;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRemoveAfter;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;

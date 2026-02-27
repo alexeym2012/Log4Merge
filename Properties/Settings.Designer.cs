@@ -35,5 +35,14 @@ namespace Log4Merge.Properties
             get { return ((string)(this["LevelRegexPattern"])); }
             set { this["LevelRegexPattern"] = value; }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("yyyy-MM-dd HH:mm:ss,fff")]
+        public string TimeStampFormat
+        {
+            get { return ((string)(this["TimeStampFormat"])); }
+            set { this["TimeStampFormat"] = value; }
+        }
     }
 }

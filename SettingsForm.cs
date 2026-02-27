@@ -15,12 +15,16 @@ namespace Log4Merge
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
+            var format = Settings.Default.TimeStampFormat;
+            txtTimeStampFormat.Text = string.IsNullOrEmpty(format) ? LogEntry.DefaultTimeStampFormat : format;
+
             var pattern = Settings.Default.LevelRegexPattern;
             txtLevelRegex.Text = string.IsNullOrEmpty(pattern) ? LogEntry.DefaultLevelRegexPattern : pattern;
         }
 
         private void btnReset_Click(object sender, EventArgs e)
         {
+            txtTimeStampFormat.Text = LogEntry.DefaultTimeStampFormat;
             txtLevelRegex.Text = LogEntry.DefaultLevelRegexPattern;
         }
 
@@ -35,6 +39,23 @@ namespace Log4Merge
 
         private bool ValidateAndSavePattern()
         {
+            var format = txtTimeStampFormat.Text?.Trim() ?? "";
+            if (string.IsNullOrEmpty(format))
+            {
+                MessageBox.Show(this, "Please enter a timestamp format.", "Invalid timestamp format", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            try
+            {
+                _ = DateTime.Now.ToString(format);
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show(this, "The timestamp format is invalid: " + ex.Message, "Invalid timestamp format", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
             var pattern = txtLevelRegex.Text?.Trim() ?? "";
             if (string.IsNullOrEmpty(pattern))
             {
@@ -52,6 +73,7 @@ namespace Log4Merge
                 return false;
             }
 
+            Settings.Default.TimeStampFormat = format;
             Settings.Default.LevelRegexPattern = pattern;
             Settings.Default.Save();
             return true;

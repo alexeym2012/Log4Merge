@@ -10,6 +10,7 @@ namespace Log4Merge.Domain
     internal class LogEntry
     {
         internal static readonly string DefaultLevelRegexPattern = @"^\s*-\s*(ERROR|FATAL|WARN(?:ING)?|INFO|DEBUG|TRACE)\b";
+        internal static readonly string DefaultTimeStampFormat = @"yyyy-MM-dd HH:mm:ss,fff";
 
         private static string s_cachedPattern;
         private static Regex s_cachedRegex;
@@ -44,7 +45,23 @@ namespace Log4Merge.Domain
         public string ShortMessage { get; set; }
         public string LogLevel { get; }
 
-        public string TimeStampAsText => TimeStamp.ToString(@"yyyy-MM-dd HH:mm:ss,fff");
+        public string TimeStampAsText
+        {
+            get
+            {
+                var format = Log4Merge.Properties.Settings.Default.TimeStampFormat;
+                if (string.IsNullOrEmpty(format))
+                    format = DefaultTimeStampFormat;
+                try
+                {
+                    return TimeStamp.ToString(format);
+                }
+                catch (FormatException)
+                {
+                    return TimeStamp.ToString(DefaultTimeStampFormat);
+                }
+            }
+        }
 
         public LogEntry(
             string sourceFileName,

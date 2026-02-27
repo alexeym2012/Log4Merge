@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Log4Merge.Domain;
@@ -21,33 +22,147 @@ namespace Log4Merge
         private string _filterText = string.Empty;
 
         private BindingList<HighlightEntry> _highlightEntries = new BindingList<HighlightEntry>();
+
+        /// <summary>File paths passed on startup; loaded asynchronously in Shown.</summary>
+        private string[] _pendingFileArgs;
+
         public FormMainForm(string[] args)
         {
             InitializeComponent();
 
             this.Text = $"{this.Text} {GetAssemblyVersion()}";
-            
-            
+
             if (args != null && args.Length > 0)
+                _pendingFileArgs = args;
+        }
+
+        private void FormMainForm_Shown(object sender, EventArgs e)
+        {
+            if (_pendingFileArgs == null || _pendingFileArgs.Length == 0)
+                return;
+            var files = _pendingFileArgs;
+            _pendingFileArgs = null;
+            var progress = new Progress<LoadProgress>(p =>
             {
-                //MessageBox.Show(string.Join("\n", args), "Files Passed");
-                
-                
-                foreach (var logFileName in args)
+                toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
+                toolStripProgressBar.Value = p.CurrentFileIndex;
+            });
+            _ = LoadLogFilesAsync(files, clearExisting: true, progress, CancellationToken.None);
+        }
+
+        private struct LoadProgress
+        {
+            public int CurrentFileIndex { get; set; }
+            public int TotalFiles { get; set; }
+            public string CurrentFileName { get; set; }
+        }
+
+        /// <summary>Parses a single log file and returns entries (thread-safe, no shared state).</summary>
+        private static List<LogEntry> ParseLogFile(string logFileName)
+        {
+            var logLines = File.ReadAllLines(logFileName, Encoding.UTF8);
+            var entries = new List<LogEntry>();
+            LogEntry lastEntry = null;
+
+            for (var i = 0; i < logLines.Length; i++)
+            {
+                var logLine = logLines[i];
+                if (logLine.Length < 23)
                 {
-                    AppendLogsFromTheFile(logFileName);
+                    lastEntry?.AppendMessage(logLine);
+                }
+                else
+                {
+                    var timeString = logLine.Substring(0, 23);
+                    var message = logLine.Substring(23);
+
+                    if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal, out var timeStamp))
+                    {
+                        var entry = new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message);
+                        entries.Add(entry);
+                        lastEntry = entry;
+                    }
+                    else
+                    {
+                        lastEntry?.AppendMessage(logLine);
+                    }
+                }
+            }
+
+            return entries;
+        }
+
+        private void AppendLogsFromTheFile(string logFileName)
+        {
+            var entries = ParseLogFile(logFileName);
+            foreach (var entry in entries)
+                _logEntries.Add(entry);
+        }
+
+        private async Task LoadLogFilesAsync(string[] fileNames, bool clearExisting, IProgress<LoadProgress> progress, CancellationToken cancellationToken)
+        {
+            var totalFiles = fileNames?.Length ?? 0;
+            if (totalFiles == 0)
+                return;
+
+            toolStripStatusLabelLines.Text = "Loading 1 of " + totalFiles + " files...";
+            toolStripProgressBar.Visible = true;
+            toolStripProgressBar.Style = ProgressBarStyle.Continuous;
+            toolStripProgressBar.Maximum = totalFiles;
+            toolStripProgressBar.Value = 0;
+            openLog4netLogsToolStripMenuItem.Enabled = false;
+            appendLog4netLogsToolStripMenuItem.Enabled = false;
+
+            try
+            {
+                List<LogEntry> collected;
+                try
+                {
+                    collected = await Task.Run(() =>
+                    {
+                        var list = new List<LogEntry>();
+                        for (var i = 0; i < fileNames.Length; i++)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            var file = fileNames[i];
+                            var entries = ParseLogFile(file);
+                            list.AddRange(entries);
+                            progress?.Report(new LoadProgress
+                            {
+                                CurrentFileIndex = i + 1,
+                                TotalFiles = totalFiles,
+                                CurrentFileName = file
+                            });
+                        }
+                        return list;
+                    }, cancellationToken).ConfigureAwait(true);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
                 }
 
+                if (clearExisting)
+                    _logEntries.Clear();
+                foreach (var entry in collected)
+                    _logEntries.Add(entry);
                 _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
                 BindLogViewerDataGrip();
             }
+            finally
+            {
+                toolStripProgressBar.Visible = false;
+                openLog4netLogsToolStripMenuItem.Enabled = true;
+                appendLog4netLogsToolStripMenuItem.Enabled = true;
+                BindToolStrip();
+            }
         }
-
 
         private void BindLogViewerDataGrip()
         {
             gridLogsViewer.DataSource = _logEntries;
-            saveAsToolStripMenuItem.Enabled = saveAsLogToolStripMenuItem.Enabled = _logEntries.Count > 0;
+            saveAsToolStripMenuItem.Enabled = saveAsLogToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetContextMenuItem.Enabled = _logEntries.Count > 0;
             if (_highlightEntries.Count > 0)
             {
                 for (var i = 0; i < _logEntries.Count; i++)
@@ -68,19 +183,32 @@ namespace Log4Merge
             BindToolStrip();
         }
 
+        private IEnumerable<LogEntry> GetVisibleLogEntries()
+        {
+            foreach (DataGridViewRow row in gridLogsViewer.Rows)
+            {
+                if (!row.Visible) continue;
+                if (row.DataBoundItem is LogEntry entry)
+                    yield return entry;
+            }
+        }
+
         private void BindToolStrip()
         {
             var total = gridLogsViewer.Rows.Count;
             bool isFiltered = !string.IsNullOrWhiteSpace(_filterText) || !AreAllLevelsChecked();
+            int visibleCount;
             if (isFiltered)
             {
-                var visible = gridLogsViewer.Rows.Cast<DataGridViewRow>().Count(r => r.Visible);
-                toolStripStatusLabelLines.Text = $"Lines: {visible} / {total} (filtered)";
+                visibleCount = gridLogsViewer.Rows.Cast<DataGridViewRow>().Count(r => r.Visible);
+                toolStripStatusLabelLines.Text = $"Lines: {visibleCount} / {total} (filtered)";
             }
             else
             {
+                visibleCount = total;
                 toolStripStatusLabelLines.Text = $"Lines: {total}";
             }
+            saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetContextMenuItem.Enabled = visibleCount > 0;
         }
 
         private bool IsLevelVisible(string logLevel)
@@ -134,65 +262,30 @@ namespace Log4Merge
             }
         }
 
-        private void openLog4netLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void openLog4netLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFilesDialog(true);
+            await OpenFilesDialogAsync(clearExisting: true);
         }
 
-        private void OpenFilesDialog(bool clearExisting)
+        private async void appendLog4netLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            await OpenFilesDialogAsync(clearExisting: false);
+        }
+
+        private async Task OpenFilesDialogAsync(bool clearExisting)
         {
             var d = new OpenFileDialog();
             d.Multiselect = true;
             d.InitialDirectory = @"C:\tmp\logs-test\sideGall";
-            if (d.ShowDialog() == DialogResult.OK)
+            if (d.ShowDialog() != DialogResult.OK)
+                return;
+
+            var progress = new Progress<LoadProgress>(p =>
             {
-                if (clearExisting)
-                {
-                    _logEntries.Clear();
-                }
-
-                foreach (var logFileName in d.FileNames)
-                {
-                    AppendLogsFromTheFile(logFileName);
-                }
-
-                _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
-                BindLogViewerDataGrip();
-            }
-        }
-
-        private void AppendLogsFromTheFile(string logFileName)
-        {
-            var logLines = System.IO.File.ReadAllLines(logFileName, Encoding.UTF8);
-
-            for (var i = 0; i < logLines.Length; i++)
-            {
-                var logLine = logLines[i];
-                if (logLine.Length < 23)
-                {
-                    _logEntries.Last()?.AppendMessage(logLine);
-                }
-                else
-                {
-                    var timeString = logLine.Substring(0, 23);
-                    var message = logLine.Substring(23);
-
-                    if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeUniversal, out var timeStamp))
-                    {
-                        _logEntries.Add(new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message));
-                    }
-                    else
-                    {
-                        _logEntries.Last()?.AppendMessage(logLine);
-                    }
-                }
-            }
-        }
-
-        private void appendLog4netLogsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFilesDialog(false);
+                toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
+                toolStripProgressBar.Value = p.CurrentFileIndex;
+            });
+            await LoadLogFilesAsync(d.FileNames, clearExisting, progress, CancellationToken.None);
         }
 
         private void contributeMenuItem_Click(object sender, EventArgs e)
@@ -404,6 +497,25 @@ namespace Log4Merge
                     }
 
                     //File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText} {l.Message}")));
+                }
+            }
+        }
+
+        private void saveFilteredRowsAsLog4NetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var visibleEntries = GetVisibleLogEntries().ToList();
+            var saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Log4New|*.log";
+            saveFileDialog.Title = "Save Logs To File";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                if (saveFileDialog.FileName != "")
+                {
+                    using (var writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        foreach (var l in visibleEntries)
+                            writer.WriteLine($"{l.TimeStampAsText} {l.Message}");
+                    }
                 }
             }
         }

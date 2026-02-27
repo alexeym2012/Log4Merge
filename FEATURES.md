@@ -7,7 +7,7 @@ This document tracks feature ideas identified through codebase analysis.
 ## [Implemented]1. Live Search / Non-Destructive Filter Bar
 A text box + "Filter" button above the grid that hides non-matching rows without deleting them. A "Clear Filter" button restores all rows. Currently all filter operations are destructive (rows are permanently removed from `_logEntries`).
 
-## 2. Log Level Parsing + Column
+## [Implemented]2. Log Level Parsing + Column
 Parse log level (ERROR, WARN, INFO, DEBUG) from the message text and show it as a dedicated column. Add toolbar checkboxes or a dropdown to toggle which levels are visible.
 
 ## 3. Persist Highlight Profiles & Last Directory
