@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -71,7 +71,8 @@ namespace Log4Merge
         private void BindToolStrip()
         {
             var total = gridLogsViewer.Rows.Count;
-            if (!string.IsNullOrWhiteSpace(_filterText))
+            bool isFiltered = !string.IsNullOrWhiteSpace(_filterText) || !AreAllLevelsChecked();
+            if (isFiltered)
             {
                 var visible = gridLogsViewer.Rows.Cast<DataGridViewRow>().Count(r => r.Visible);
                 toolStripStatusLabelLines.Text = $"Lines: {visible} / {total} (filtered)";
@@ -81,6 +82,25 @@ namespace Log4Merge
                 toolStripStatusLabelLines.Text = $"Lines: {total}";
             }
         }
+
+        private bool IsLevelVisible(string logLevel)
+        {
+            switch (logLevel)
+            {
+                case "ERROR": return chkLevelError.Checked;
+                case "FATAL": return chkLevelFatal.Checked;
+                case "WARN":  return chkLevelWarn.Checked;
+                case "INFO":  return chkLevelInfo.Checked;
+                case "DEBUG": return chkLevelDebug.Checked;
+                case "TRACE": return chkLevelTrace.Checked;
+                default:      return chkLevelOther.Checked;
+            }
+        }
+
+        private bool AreAllLevelsChecked() =>
+            chkLevelError.Checked && chkLevelFatal.Checked && chkLevelWarn.Checked &&
+            chkLevelInfo.Checked  && chkLevelDebug.Checked && chkLevelTrace.Checked &&
+            chkLevelOther.Checked;
 
         private void gridLogsViewer_KeyDown(object sender, KeyEventArgs e)
         {
@@ -92,6 +112,15 @@ namespace Log4Merge
                 }
 
                 BindToolStrip();
+            }
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var settingsForm = new SettingsForm())
+            {
+                settingsForm.Owner = this;
+                settingsForm.ShowDialog();
             }
         }
 
@@ -265,7 +294,7 @@ namespace Log4Merge
 
         private void gridLogsViewer_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > 0 && e.ColumnIndex == 4)
+            if (e.RowIndex > 0 && e.ColumnIndex == 6)
             {
                 //_logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message;
             }
@@ -273,7 +302,7 @@ namespace Log4Merge
 
         private void gridLogsViewer_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > 0 && e.ColumnIndex == 4)
+            if (e.RowIndex > 0 && e.ColumnIndex == 6)
             {
 
                 _logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message.Substring(0, Math.Min(_logEntries[e.RowIndex].ShortMessage.Length + 20, _logEntries[e.RowIndex].Message.Length));
@@ -323,7 +352,7 @@ namespace Log4Merge
             var sb = new StringBuilder();
             foreach (DataGridViewCell selectedCell in gridLogsViewer.SelectedCells.OfType<DataGridViewCell>().OrderBy(r => r.RowIndex))
             {
-                if (selectedCell.ColumnIndex == 4)
+                if (selectedCell.ColumnIndex == 6)
                 {
                     sb.Append(_logEntries[selectedCell.RowIndex].Message);
                 }
@@ -407,24 +436,29 @@ namespace Log4Merge
             // DataGridView throws if you hide the currently active row, so clear it first.
             gridLogsViewer.CurrentCell = null;
 
-            if (string.IsNullOrWhiteSpace(_filterText))
+            var patterns = string.IsNullOrWhiteSpace(_filterText)
+                ? new string[0]
+                : _filterText.ToLower().Split('|')
+                    .Select(p => p.Trim()).Where(p => p.Length > 0).ToArray();
+
+            bool hasTextFilter  = patterns.Length > 0;
+            bool hasLevelFilter = !AreAllLevelsChecked();
+
+            if (!hasTextFilter && !hasLevelFilter)
             {
                 foreach (DataGridViewRow row in gridLogsViewer.Rows)
                     row.Visible = true;
                 return;
             }
 
-            var patterns = _filterText.ToLower()
-                .Split('|')
-                .Select(p => p.Trim())
-                .Where(p => p.Length > 0)
-                .ToArray();
-
             foreach (DataGridViewRow row in gridLogsViewer.Rows)
             {
                 var entry = row.DataBoundItem as LogEntry;
                 if (entry == null) { row.Visible = true; continue; }
-                row.Visible = patterns.Any(p => entry.Message.ToLower().Contains(p));
+
+                bool textMatch  = !hasTextFilter  || patterns.Any(p => entry.Message.ToLower().Contains(p));
+                bool levelMatch = !hasLevelFilter || IsLevelVisible(entry.LogLevel);
+                row.Visible = textMatch && levelMatch;
             }
         }
 
@@ -472,6 +506,12 @@ namespace Log4Merge
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
+        }
+
+        private void levelButton_CheckedChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
+            BindToolStrip();
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

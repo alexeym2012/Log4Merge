@@ -4,7 +4,7 @@ This document tracks feature ideas identified through codebase analysis.
 
 ---
 
-## 1. Live Search / Non-Destructive Filter Bar
+## [Implemented]1. Live Search / Non-Destructive Filter Bar
 A text box + "Filter" button above the grid that hides non-matching rows without deleting them. A "Clear Filter" button restores all rows. Currently all filter operations are destructive (rows are permanently removed from `_logEntries`).
 
 ## 2. Log Level Parsing + Column
