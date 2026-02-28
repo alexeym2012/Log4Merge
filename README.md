@@ -10,12 +10,17 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 
 - [Quick Start](#quick-start)
 - [Opening Log Files](#opening-log-files)
+- [Session Restore](#session-restore)
 - [The Log Viewer Grid](#the-log-viewer-grid)
+- [Log Level Filter](#log-level-filter)
 - [Live Search / Filter Bar](#live-search--filter-bar)
+- [Time Range Filter](#time-range-filter)
 - [Text Highlighting](#text-highlighting)
+- [Auto-Refresh / Tail Mode](#auto-refresh--tail-mode)
 - [Row Removal (Destructive Filters)](#row-removal-destructive-filters)
 - [Saving Results](#saving-results)
 - [Copying to Clipboard](#copying-to-clipboard)
+- [Status Bar](#status-bar)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Log Format Reference](#log-format-reference)
 - [Building from Source](#building-from-source)
@@ -29,6 +34,7 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 2. **File → Open Log4net logs…** — pick one or more `.log` files
 3. All lines merge into a single grid, sorted by timestamp
 4. Use the **Search bar** at the top to filter live, or right-click rows to remove noise
+5. Highlight rules from your last session are restored automatically on startup
 
 ---
 
@@ -45,20 +51,53 @@ After loading, entries are automatically **deduplicated** (identical timestamp +
 
 Multi-line log entries (stack traces, exception details) are supported — continuation lines without a timestamp are appended to the preceding entry's message.
 
+Files are loaded asynchronously with a progress bar in the status strip so the UI stays responsive during large loads.
+
+The open dialog remembers the last directory you used across sessions.
+
+---
+
+## Session Restore
+
+On startup, if no files are passed via command line, Log4Merge checks whether a previous session was saved. If it finds one, a dialog asks whether to reopen those files:
+
+- Click **Yes** to reload all files from the last session
+- Click **No** to start with an empty view
+- Files that have been deleted since the last session are silently skipped
+- The session is updated automatically every time files are loaded or appended
+
+Sessions are stored in `%APPDATA%\Log4Merge\session.json`.
+
 ---
 
 ## The Log Viewer Grid
 
-Each row represents one parsed log entry with four visible columns:
+Each row represents one parsed log entry with five visible columns:
 
 | Column | Description |
 |---|---|
 | **TimeStamp** | Parsed timestamp in `yyyy-MM-dd HH:mm:ss,fff` format |
+| **Log Level** | Severity extracted from the message text (ERROR, FATAL, WARN, INFO, DEBUG, TRACE) |
 | **Source File** | Full path to the file the entry came from |
 | **Line** | Line number within the source file |
 | **Log Message** | First 100 characters of the message. Double-click to expand by 20 characters at a time |
 
 The grid supports **multi-row selection** (click + Shift/Ctrl) which is used by several removal operations.
+
+---
+
+## Log Level Filter
+
+A toolbar below the search bar contains toggle buttons for each severity level:
+
+```
+[ERROR] [FATAL] [WARN] [INFO] [DEBUG] [TRACE] [other]
+```
+
+- Click a button to **hide** all rows at that level; click again to **show** them
+- **other** covers entries where no recognisable level was detected
+- The level filter is **ANDed** with the text search filter — both must match for a row to be visible
+- This filter is non-destructive: toggling levels never removes rows from the underlying data
 
 ---
 
@@ -85,14 +124,17 @@ Separate patterns with `|` to show rows matching **any** of them:
 NullReferenceException|timeout|connection refused
 ```
 
-### Status bar
+---
 
-The status strip at the bottom updates to reflect the current view:
+## Time Range Filter
 
-```
-Lines: 342 / 12,847 (filtered)    ← filtered mode
-Lines: 12,847                      ← all rows visible
-```
+Two date/time pickers in the toolbar let you narrow the visible rows to a specific window of time without deleting anything.
+
+- Set a **From** and/or **To** date/time to hide rows outside that range
+- Click **Clear** to remove the range and show all rows again
+- The time range filter is non-destructive and combines with the text and level filters
+
+This complements the destructive **Remove Before/After Selected** context menu operations — use the time range filter when you want to explore a window without committing to a removal.
 
 ---
 
@@ -114,10 +156,27 @@ The pattern list renders each entry using its own colors so you can see exactly 
 | Add a rule | Enter pattern, pick colors, click **Add** |
 | Edit a rule | Select it in the list, modify pattern/colors in-place |
 | Remove a rule | Select one or more entries, click **Remove** |
-| Export rules | **Export** → saves as a `.json` file |
+| Export rules | **Export** → saves as a `.json` file for sharing |
 | Import rules | **Import** → loads from a previously exported `.json` file |
 
-Highlight profiles can be shared across machines via the export/import JSON feature.
+### Auto-save / Auto-load
+
+Highlight rules are **automatically saved** to `%APPDATA%\Log4Merge\highlights.json` every time you close the Highlighting dialog with OK. They are **automatically restored** the next time you launch the app — no manual import needed.
+
+Profiles can still be exported and imported manually to share rules across machines.
+
+---
+
+## Auto-Refresh / Tail Mode
+
+Enable **Tail Mode** from the toolbar to watch the loaded log files for new content in real time.
+
+- When active, a `FileSystemWatcher` monitors every loaded file for changes
+- New lines appended to any file are parsed and added to the grid automatically
+- The status bar shows when Tail Mode is active
+- Click the toggle again to stop watching
+
+Tail Mode is useful when monitoring a running application — load the log files once, enable Tail Mode, and watch new entries appear without reloading.
 
 ---
 
@@ -182,6 +241,19 @@ Right-click → **Copy** copies the selected cells to the clipboard.
 
 ---
 
+## Status Bar
+
+The status strip at the bottom shows live metrics for the current view:
+
+| Segment | Description |
+|---|---|
+| **Lines** | `X / Y (filtered)` when a filter is active; `Y` when all rows are visible |
+| **Highlighted** | Number of rows matching at least one highlight rule |
+| **Time span** | Earliest to latest timestamp across all visible entries |
+| **Sources** | Number of distinct source files loaded |
+
+---
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
@@ -211,6 +283,7 @@ yyyy-MM-dd HH:mm:ss,fff <message text...>
 - The first 23 characters must be a valid `yyyy-MM-dd HH:mm:ss,fff` timestamp.
 - Lines that do not start with a valid timestamp are treated as continuations and appended to the previous entry's message (multi-line / stack trace support).
 - Timestamps are stored internally as UTC.
+- The timestamp format can be changed in **Preferences → Settings…** if your logs use a different pattern.
 
 ---
 
@@ -229,7 +302,7 @@ msbuild Log4Merge.sln /p:Configuration=Release
 Output goes to `bin\Debug\` or `bin\Release\`. There is no test suite.
 
 **Dependencies** (via NuGet):
-- `Newtonsoft.Json 13.0.3` — highlight profile JSON import/export
+- `Newtonsoft.Json 13.0.3` — highlight profile JSON import/export and auto-save
 - `Microsoft.VisualBasic` — `Interaction.InputBox` for the Remove By Text dialog
 
 ---

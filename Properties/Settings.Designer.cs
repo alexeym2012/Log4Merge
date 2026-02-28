@@ -44,5 +44,13 @@ namespace Log4Merge.Properties
             get { return ((string)(this["TimeStampFormat"])); }
             set { this["TimeStampFormat"] = value; }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastOpenDirectory {
+            get { return ((string)(this["LastOpenDirectory"])); }
+            set { this["LastOpenDirectory"] = value; }
+        }
     }
 }

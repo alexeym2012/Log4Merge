@@ -10,11 +10,11 @@ A text box + "Filter" button above the grid that hides non-matching rows without
 ## [Implemented]2. Log Level Parsing + Column
 Parse log level (ERROR, WARN, INFO, DEBUG) from the message text and show it as a dedicated column. Add toolbar checkboxes or a dropdown to toggle which levels are visible.
 
-## 3. Persist Highlight Profiles & Last Directory
+## [Implemented] 3. Persist Highlight Profiles & Last Directory
 - Auto-save highlight entries to `%AppData%\Log4Merge\highlights.json` on dialog OK, auto-load on startup.
 - Remember the last used directory in the open dialog (currently hardcoded to `C:\tmp\logs-test\sideGall`).
 
-## 4. Session Restore
+## [Implemented] 4. Session Restore
 Remember which log files were loaded (file paths saved to `%AppData%\Log4Merge\session.json`). On startup, offer to re-open the last session. Useful when iterating on the same set of logs.
 
 ## [Implemented]5. Async File Loading with Progress

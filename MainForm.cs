@@ -39,10 +39,100 @@ namespace Log4Merge
                 _pendingFileArgs = args;
         }
 
+        private static string GetHighlightProfilePath()
+        {
+            var dir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "Log4Merge");
+            Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "highlights.json");
+        }
+
+        private void LoadHighlightProfiles()
+        {
+            var path = GetHighlightProfilePath();
+            if (!File.Exists(path)) return;
+            try
+            {
+                var list = JsonConvert.DeserializeObject<List<HighlightEntry>>(File.ReadAllText(path));
+                if (list == null) return;
+                _highlightEntries.Clear();
+                foreach (var entry in list)
+                    _highlightEntries.Add(entry);
+            }
+            catch { /* corrupt file — ignore, don't crash */ }
+        }
+
+        private void SaveHighlightProfiles()
+        {
+            try
+            {
+                File.WriteAllText(GetHighlightProfilePath(),
+                    JsonConvert.SerializeObject(_highlightEntries, Formatting.Indented));
+            }
+            catch { /* best-effort save */ }
+        }
+
+        private static string GetSessionPath()
+        {
+            var dir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "Log4Merge");
+            Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "session.json");
+        }
+
+        private void SaveSession()
+        {
+            try
+            {
+                File.WriteAllText(GetSessionPath(),
+                    JsonConvert.SerializeObject(_loadedFiles.ToArray(), Formatting.Indented));
+            }
+            catch { /* best-effort */ }
+        }
+
+        private async Task TryRestoreSessionAsync()
+        {
+            var path = GetSessionPath();
+            if (!File.Exists(path)) return;
+            string[] saved;
+            try
+            {
+                saved = JsonConvert.DeserializeObject<string[]>(File.ReadAllText(path));
+            }
+            catch { return; }
+            if (saved == null || saved.Length == 0) return;
+
+            var existing = saved.Where(File.Exists).ToArray();
+            if (existing.Length == 0) return;
+
+            var names = string.Join("\n", existing.Take(5).Select(Path.GetFileName));
+            var more = existing.Length > 5 ? $"\n… and {existing.Length - 5} more" : string.Empty;
+            var answer = MessageBox.Show(
+                $"Restore last session? ({existing.Length} file{(existing.Length == 1 ? "" : "s")})\n\n{names}{more}",
+                "Session Restore",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (answer != DialogResult.Yes) return;
+
+            var progress = new Progress<LoadProgress>(p =>
+            {
+                toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
+                toolStripProgressBar.Value = p.CurrentFileIndex;
+            });
+            await LoadLogFilesAsync(existing, clearExisting: true, progress, CancellationToken.None);
+        }
+
         private void FormMainForm_Shown(object sender, EventArgs e)
         {
+            LoadHighlightProfiles();
+
             if (_pendingFileArgs == null || _pendingFileArgs.Length == 0)
+            {
+                _ = TryRestoreSessionAsync();
                 return;
+            }
             var files = _pendingFileArgs;
             _pendingFileArgs = null;
             var progress = new Progress<LoadProgress>(p =>
@@ -159,6 +249,8 @@ namespace Log4Merge
 
                 if (chkTailMode.Checked)
                     InitializeTailPositions();
+
+                SaveSession();
             }
             finally
             {
@@ -293,6 +385,7 @@ namespace Log4Merge
             var hightPreferencesDialog = new HighlightPreferencesDialog(this._highlightEntries);
             if (hightPreferencesDialog.ShowDialog() == DialogResult.OK)
             {
+                SaveHighlightProfiles();
                 _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
                 BindLogViewerDataGrip();
             }
@@ -312,9 +405,15 @@ namespace Log4Merge
         {
             var d = new OpenFileDialog();
             d.Multiselect = true;
-            d.InitialDirectory = @"C:\tmp\logs-test\sideGall";
+            var lastDir = Properties.Settings.Default.LastOpenDirectory;
+            d.InitialDirectory = !string.IsNullOrEmpty(lastDir) && Directory.Exists(lastDir)
+                ? lastDir
+                : string.Empty;
             if (d.ShowDialog() != DialogResult.OK)
                 return;
+
+            Properties.Settings.Default.LastOpenDirectory = Path.GetDirectoryName(d.FileNames[0]);
+            Properties.Settings.Default.Save();
 
             var progress = new Progress<LoadProgress>(p =>
             {
