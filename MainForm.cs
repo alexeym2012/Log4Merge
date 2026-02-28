@@ -26,6 +26,9 @@ namespace Log4Merge
         /// <summary>File paths passed on startup; loaded asynchronously in Shown.</summary>
         private string[] _pendingFileArgs;
 
+        private readonly List<string> _loadedFiles = new List<string>();
+        private readonly Dictionary<string, long> _tailFilePositions = new Dictionary<string, long>();
+
         public FormMainForm(string[] args)
         {
             InitializeComponent();
@@ -144,11 +147,18 @@ namespace Log4Merge
                 }
 
                 if (clearExisting)
+                {
                     _logEntries.Clear();
+                    _loadedFiles.Clear();
+                }
+                _loadedFiles.AddRange(fileNames);
                 foreach (var entry in collected)
                     _logEntries.Add(entry);
                 _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
                 BindLogViewerDataGrip();
+
+                if (chkTailMode.Checked)
+                    InitializeTailPositions();
             }
             finally
             {
@@ -233,7 +243,8 @@ namespace Log4Merge
 
             // Source files
             var fileCount = _logEntries.Select(e => e.SourceFileName).Distinct().Count();
-            toolStripStatusLabelFiles.Text = $"Files: {fileCount:N0}";
+            var tailIndicator = chkTailMode.Checked ? "  |  Tail: ON" : string.Empty;
+            toolStripStatusLabelFiles.Text = $"Files: {fileCount:N0}{tailIndicator}";
         }
 
         private bool IsLevelVisible(string logLevel)
@@ -680,6 +691,139 @@ namespace Log4Merge
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void chkTailMode_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkTailMode.Checked)
+            {
+                if (_loadedFiles.Count == 0)
+                {
+                    chkTailMode.Checked = false;
+                    MessageBox.Show("Open log files first before enabling Tail Mode.", "Tail Mode", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                InitializeTailPositions();
+                tailTimer.Start();
+                BindToolStrip();
+            }
+            else
+            {
+                tailTimer.Stop();
+                _tailFilePositions.Clear();
+                BindToolStrip();
+            }
+        }
+
+        private void InitializeTailPositions()
+        {
+            _tailFilePositions.Clear();
+            foreach (var file in _loadedFiles)
+            {
+                try { _tailFilePositions[file] = new FileInfo(file).Length; }
+                catch { _tailFilePositions[file] = 0; }
+            }
+        }
+
+        private void tailTimer_Tick(object sender, EventArgs e)
+        {
+            var newEntries = new List<LogEntry>();
+            string lastError = null;
+
+            foreach (var file in _loadedFiles.ToList())
+            {
+                if (!File.Exists(file)) continue;
+                long startPos = _tailFilePositions.TryGetValue(file, out long pos) ? pos : 0;
+                try
+                {
+                    var parsed = ParseLogFileFromPosition(file, startPos, out long newPos);
+                    _tailFilePositions[file] = newPos;
+                    newEntries.AddRange(parsed);
+                }
+                catch (Exception ex)
+                {
+                    lastError = $"Tail error: {ex.Message}";
+                }
+            }
+
+            if (lastError != null)
+            {
+                toolStripStatusLabelFiles.Text = lastError;
+                return;
+            }
+
+            if (newEntries.Count == 0) return;
+
+            foreach (var entry in newEntries.OrderBy(entry => entry.TimeStamp))
+                _logEntries.Add(entry);
+            _logEntries = new BindingList<LogEntry>(_logEntries.OrderBy(l => l.TimeStamp).ToList());
+            BindLogViewerDataGrip();
+
+            // Scroll to the last visible row
+            var lastVisibleIndex = -1;
+            for (int i = gridLogsViewer.Rows.Count - 1; i >= 0; i--)
+            {
+                if (gridLogsViewer.Rows[i].Visible) { lastVisibleIndex = i; break; }
+            }
+            if (lastVisibleIndex >= 0)
+                gridLogsViewer.FirstDisplayedScrollingRowIndex = lastVisibleIndex;
+        }
+
+        private static List<LogEntry> ParseLogFileFromPosition(string logFileName, long startPosition, out long newPosition)
+        {
+            var entries = new List<LogEntry>();
+            newPosition = startPosition;
+
+            // Try FileShare.ReadWrite first; fall back to FileShare.Read if denied
+            FileStream fs;
+            try
+            {
+                fs = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            }
+            catch (IOException)
+            {
+                fs = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+
+            using (fs)
+            {
+                if (fs.Length <= startPosition)
+                    return entries;
+
+                fs.Seek(startPosition, SeekOrigin.Begin);
+                var bytesToRead = (int)(fs.Length - startPosition);
+                var bytes = new byte[bytesToRead];
+                int bytesRead = fs.Read(bytes, 0, bytesToRead);
+                newPosition = startPosition + bytesRead;
+
+                var text = Encoding.UTF8.GetString(bytes, 0, bytesRead);
+                var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                LogEntry lastEntry = null;
+                foreach (var logLine in lines)
+                {
+                    if (logLine.Length < 23)
+                    {
+                        lastEntry?.AppendMessage(logLine);
+                        continue;
+                    }
+                    var timeString = logLine.Substring(0, 23);
+                    var message = logLine.Substring(23);
+                    if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff",
+                            CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var timeStamp))
+                    {
+                        var entry = new LogEntry(logFileName, 0, timeStamp.ToUniversalTime(), message);
+                        entries.Add(entry);
+                        lastEntry = entry;
+                    }
+                    else
+                    {
+                        lastEntry?.AppendMessage(logLine);
+                    }
+                }
+            }
+
+            return entries;
         }
     }
 }

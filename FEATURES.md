@@ -20,7 +20,7 @@ Remember which log files were loaded (file paths saved to `%AppData%\Log4Merge\s
 ## [Implemented]5. Async File Loading with Progress
 Large log files currently freeze the UI (synchronous `File.ReadAllLines`). Load files on a background thread with a progress bar in the status strip. Shows "Loading X of Y files..." during load.
 
-## 6. Auto-Refresh / Tail Mode
+## [Implemented] 6. Auto-Refresh / Tail Mode
 Watch loaded files with a `FileSystemWatcher` and append new lines as they are written. A toggle button in the toolbar to enable/disable live tailing. Useful for monitoring active applications.
 
 ## 7. Find & Highlight (Ctrl+F)
@@ -40,7 +40,7 @@ Add export options that produce structured output:
 - **HTML**: color-coded table with actual highlight colors applied (useful for sharing with others who don't have the tool)
 - **CSV**: proper RFC 4180 CSV with headers
 
-## 12. Status Bar Enhancements
+## 12. [Impemented]Status Bar Enhancements
 Show additional stats in the status strip:
 - Count of currently highlighted rows (e.g., "Highlighted: 42 / 1,203")
 - Time span of loaded logs (earliest to latest timestamp)

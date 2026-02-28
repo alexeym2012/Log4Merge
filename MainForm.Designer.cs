@@ -95,6 +95,8 @@ namespace Log4Merge
             this.dtpFrom = new System.Windows.Forms.DateTimePicker();
             this.dtpTo = new System.Windows.Forms.DateTimePicker();
             this.btnClearTimeRange = new System.Windows.Forms.Button();
+            this.chkTailMode = new System.Windows.Forms.CheckBox();
+            this.tailTimer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ctxGridMenu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -519,6 +521,7 @@ namespace Log4Merge
             this.levelFilterPanel.Controls.Add(this.chkLevelDebug);
             this.levelFilterPanel.Controls.Add(this.chkLevelTrace);
             this.levelFilterPanel.Controls.Add(this.chkLevelOther);
+            this.levelFilterPanel.Controls.Add(this.chkTailMode);
             this.levelFilterPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.levelFilterPanel.Location = new System.Drawing.Point(0, 81);
             this.levelFilterPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -635,7 +638,21 @@ namespace Log4Merge
             this.chkLevelOther.TabIndex = 7;
             this.chkLevelOther.Text = "(other)";
             this.chkLevelOther.CheckedChanged += new System.EventHandler(this.levelButton_CheckedChanged);
-            // 
+            //
+            // chkTailMode
+            //
+            this.chkTailMode.AutoSize = true;
+            this.chkTailMode.Margin = new System.Windows.Forms.Padding(20, 7, 2, 2);
+            this.chkTailMode.Name = "chkTailMode";
+            this.chkTailMode.TabIndex = 8;
+            this.chkTailMode.Text = "Tail Mode";
+            this.chkTailMode.CheckedChanged += new System.EventHandler(this.chkTailMode_CheckedChanged);
+            //
+            // tailTimer
+            //
+            this.tailTimer.Interval = 2000;
+            this.tailTimer.Tick += new System.EventHandler(this.tailTimer_Tick);
+            //
             // filterPanel
             // 
             this.filterPanel.Controls.Add(this.lblFilter);
@@ -847,6 +864,8 @@ namespace Log4Merge
         private System.Windows.Forms.DateTimePicker dtpTo;
         private System.Windows.Forms.Button btnClearTimeRange;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.CheckBox chkTailMode;
+        private System.Windows.Forms.Timer tailTimer;
     }
 }
 
