@@ -23,7 +23,10 @@ Large log files currently freeze the UI (synchronous `File.ReadAllLines`). Load 
 ## [Implemented] 6. Auto-Refresh / Tail Mode
 Watch loaded files with a `FileSystemWatcher` and append new lines as they are written. A toggle button in the toolbar to enable/disable live tailing. Useful for monitoring active applications.
 
-## 7. Find & Highlight (Ctrl+F)
+## [Implemented] 7. Drag & Drop Log Files
+Drag one or more log files (or a folder containing `.log` files) onto the main window or grid. A single file loads immediately (replaces the current view). Multiple files open a selection dialog showing all found files — all pre-checked — with **Open** (replace), **Append**, and **Cancel** buttons. Files that fail to parse are reported in a warning dialog after the successful files load. Session is saved automatically after a drag-and-drop load.
+
+## 8. Find & Highlight (Ctrl+F)
 A find bar (like a browser's Ctrl+F) that temporarily highlights matching rows in a distinct color and jumps between matches. Does not change `_logEntries`, purely visual navigation.
 
 ## 8. Keep By Text Pattern
@@ -51,3 +54,4 @@ Right-click → "Copy as Log Line" copies the row in the original log4net format
 
 ## 14. Bookmarks / Annotations
 Let users mark specific rows with a colored dot and an optional note. Bookmarks persist in the session. A "Next/Previous Bookmark" keyboard shortcut (F2/Shift+F2) for navigation.
+

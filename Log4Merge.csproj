@@ -94,6 +94,7 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FileSelectionDialog.cs" />
     <Compile Include="Log4MergeShellExtension.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

@@ -10,6 +10,7 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 
 - [Quick Start](#quick-start)
 - [Opening Log Files](#opening-log-files)
+- [Drag & Drop](#drag--drop)
 - [Session Restore](#session-restore)
 - [The Log Viewer Grid](#the-log-viewer-grid)
 - [Log Level Filter](#log-level-filter)
@@ -46,6 +47,7 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 | **File → Append Log4net logs…** | Adds files on top of what is already loaded (good for incremental analysis) |
 | **Command-line arguments** | `Log4Merge.exe app1.log app2.log` — files load on startup |
 | **Windows Shell Extension** | Right-click any `.log` file in Explorer → *Open with Log4Merge* |
+| **Drag & Drop** | Drop `.log` files or a folder onto the window — see [Drag & Drop](#drag--drop) |
 
 After loading, entries are automatically **deduplicated** (identical timestamp + message pairs from overlapping files are merged) and **sorted chronologically**.
 
@@ -54,6 +56,20 @@ Multi-line log entries (stack traces, exception details) are supported — conti
 Files are loaded asynchronously with a progress bar in the status strip so the UI stays responsive during large loads.
 
 The open dialog remembers the last directory you used across sessions.
+
+---
+
+## Drag & Drop
+
+You can drag one or more `.log` files — or an entire folder — and drop them directly onto the Log4Merge window.
+
+| What you drop | Behaviour |
+|---|---|
+| **Single `.log` file** | Loaded immediately, replacing the current view |
+| **Multiple `.log` files** | A file-selection dialog lists all dropped files; tick the ones you want, then choose **Open** (replace) or **Append** |
+| **Folder** | Log4Merge scans the folder for `.log` files and presents them in the same file-selection dialog |
+
+If any of the selected files cannot be parsed (unrecognised format, access error, etc.) an alert is shown after loading completes listing the failed files. Successfully parsed files are still loaded normally.
 
 ---
 

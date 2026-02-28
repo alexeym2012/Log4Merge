@@ -33,6 +33,13 @@ namespace Log4Merge
         {
             InitializeComponent();
 
+            this.AllowDrop = true;
+            gridLogsViewer.AllowDrop = true;
+            this.DragEnter += FormMainForm_DragEnter;
+            this.DragDrop  += FormMainForm_DragDrop;
+            gridLogsViewer.DragEnter += FormMainForm_DragEnter;
+            gridLogsViewer.DragDrop  += FormMainForm_DragDrop;
+
             this.Text = $"{this.Text} {GetAssemblyVersion()}";
 
             if (args != null && args.Length > 0)
@@ -186,6 +193,57 @@ namespace Log4Merge
             return entries;
         }
 
+        private void FormMainForm_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+        }
+
+        private void FormMainForm_DragDrop(object sender, DragEventArgs e)
+        {
+            var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
+            _ = HandleDroppedPathsAsync(paths);
+        }
+
+        private async Task HandleDroppedPathsAsync(string[] droppedPaths)
+        {
+            var logFiles = new System.Collections.Generic.List<string>();
+            foreach (var path in droppedPaths)
+            {
+                if (Directory.Exists(path))
+                    logFiles.AddRange(Directory.GetFiles(path, "*.log", SearchOption.TopDirectoryOnly));
+                else if (File.Exists(path))
+                    logFiles.Add(path);
+            }
+            if (logFiles.Count == 0) return;
+
+            string[] filesToLoad;
+            bool clearExisting;
+
+            if (logFiles.Count == 1)
+            {
+                filesToLoad = logFiles.ToArray();
+                clearExisting = true;
+            }
+            else
+            {
+                using (var dlg = new FileSelectionDialog(logFiles.ToArray()))
+                {
+                    if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                    filesToLoad = dlg.SelectedFiles;
+                    clearExisting = dlg.ClearExisting;
+                }
+                if (filesToLoad.Length == 0) return;
+            }
+
+            var progress = new Progress<LoadProgress>(p =>
+            {
+                toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
+                toolStripProgressBar.Value = p.CurrentFileIndex;
+            });
+            await LoadLogFilesAsync(filesToLoad, clearExisting, progress, CancellationToken.None);
+        }
+
         private void AppendLogsFromTheFile(string logFileName)
         {
             var entries = ParseLogFile(logFileName);
@@ -210,17 +268,25 @@ namespace Log4Merge
             try
             {
                 List<LogEntry> collected;
+                List<string> failedPaths;
                 try
                 {
-                    collected = await Task.Run(() =>
+                    (collected, failedPaths) = await Task.Run(() =>
                     {
-                        var list = new List<LogEntry>();
+                        var list   = new List<LogEntry>();
+                        var failed = new List<string>();
                         for (var i = 0; i < fileNames.Length; i++)
                         {
                             cancellationToken.ThrowIfCancellationRequested();
                             var file = fileNames[i];
-                            var entries = ParseLogFile(file);
-                            list.AddRange(entries);
+                            try
+                            {
+                                list.AddRange(ParseLogFile(file));
+                            }
+                            catch (Exception)
+                            {
+                                failed.Add(file);
+                            }
                             progress?.Report(new LoadProgress
                             {
                                 CurrentFileIndex = i + 1,
@@ -228,7 +294,7 @@ namespace Log4Merge
                                 CurrentFileName = file
                             });
                         }
-                        return list;
+                        return (list, failed);
                     }, cancellationToken).ConfigureAwait(true);
                 }
                 catch (OperationCanceledException)
@@ -241,7 +307,7 @@ namespace Log4Merge
                     _logEntries.Clear();
                     _loadedFiles.Clear();
                 }
-                _loadedFiles.AddRange(fileNames);
+                _loadedFiles.AddRange(fileNames.Except(failedPaths));
                 foreach (var entry in collected)
                     _logEntries.Add(entry);
                 _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
@@ -251,6 +317,12 @@ namespace Log4Merge
                     InitializeTailPositions();
 
                 SaveSession();
+
+                if (failedPaths.Count > 0)
+                    MessageBox.Show(
+                        "The following files could not be parsed:\n\n" +
+                        string.Join("\n", failedPaths.Select(Path.GetFileName)),
+                        "Parse Errors", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             finally
             {
