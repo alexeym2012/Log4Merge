@@ -1,23 +1,23 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Log4Merge.Domain.Settings;
 
-namespace Log4Merge.Domain
+namespace Log4Merge.Domain.Models
 {
-    internal class LogEntry
+    public class LogEntry
     {
-        internal static readonly string DefaultLevelRegexPattern = @"^\s*-\s*(ERROR|FATAL|WARN(?:ING)?|INFO|DEBUG|TRACE)\b";
-        internal static readonly string DefaultTimeStampFormat = @"yyyy-MM-dd HH:mm:ss,fff";
+        public static readonly string DefaultLevelRegexPattern = @"^\s*-\s*(ERROR|FATAL|WARN(?:ING)?|INFO|DEBUG|TRACE)\b";
+        public static readonly string DefaultTimeStampFormat = @"yyyy-MM-dd HH:mm:ss,fff";
+
+        /// <summary>Set once by the WinForms host before entries are created. Provides settings without a dependency on System.Windows.Forms.</summary>
+        public static ILogParserSettings Settings { get; set; }
 
         private static string s_cachedPattern;
         private static Regex s_cachedRegex;
 
         private static Regex GetLevelRegex()
         {
-            var pattern = Log4Merge.Properties.Settings.Default.LevelRegexPattern;
+            var pattern = Settings?.LevelRegexPattern;
             if (string.IsNullOrEmpty(pattern))
                 pattern = DefaultLevelRegexPattern;
 
@@ -49,7 +49,7 @@ namespace Log4Merge.Domain
         {
             get
             {
-                var format = Log4Merge.Properties.Settings.Default.TimeStampFormat;
+                var format = Settings?.TimeStampFormat;
                 if (string.IsNullOrEmpty(format))
                     format = DefaultTimeStampFormat;
                 try
@@ -63,12 +63,7 @@ namespace Log4Merge.Domain
             }
         }
 
-        public LogEntry(
-            string sourceFileName,
-            long lineNumber,
-            DateTime timeStamp,
-            string message
-            )
+        public LogEntry(string sourceFileName, long lineNumber, DateTime timeStamp, string message)
         {
             SourceFileName = sourceFileName;
             LineNumber = lineNumber;
@@ -80,10 +75,9 @@ namespace Log4Merge.Domain
                 ? (m.Groups[1].Value.ToUpper() == "WARNING" ? "WARN" : m.Groups[1].Value.ToUpper())
                 : "";
 
-            var visibleLen = Log4Merge.Properties.Settings.Default.GridVisibleLineLength;
+            var visibleLen = Settings?.GridVisibleLineLength ?? 100;
             if (visibleLen <= 0) visibleLen = 100;
             ShortMessage = Message.Length > visibleLen ? Message.Substring(0, visibleLen) : Message;
-
         }
 
         public void AppendMessage(string message)

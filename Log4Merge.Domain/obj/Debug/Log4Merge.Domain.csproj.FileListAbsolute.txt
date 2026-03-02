@@ -1,0 +1,9 @@
+C:\Repos\Log4Merge\Log4Merge.Domain\bin\Debug\Log4Merge.Domain.dll
+C:\Repos\Log4Merge\Log4Merge.Domain\bin\Debug\Log4Merge.Domain.pdb
+C:\Repos\Log4Merge\Log4Merge.Domain\bin\Debug\Newtonsoft.Json.dll
+C:\Repos\Log4Merge\Log4Merge.Domain\bin\Debug\Newtonsoft.Json.xml
+C:\Repos\Log4Merge\Log4Merge.Domain\obj\Debug\Log4Merge.Domain.csproj.AssemblyReference.cache
+C:\Repos\Log4Merge\Log4Merge.Domain\obj\Debug\Log4Merge.Domain.csproj.CoreCompileInputs.cache
+C:\Repos\Log4Merge\Log4Merge.Domain\obj\Debug\Log4Merg.971ED1D5.Up2Date
+C:\Repos\Log4Merge\Log4Merge.Domain\obj\Debug\Log4Merge.Domain.dll
+C:\Repos\Log4Merge\Log4Merge.Domain\obj\Debug\Log4Merge.Domain.pdb

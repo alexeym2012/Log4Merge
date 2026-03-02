@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Drawing;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
-namespace Log4Merge.Domain
+namespace Log4Merge.Domain.Models
 {
     public class HighlightEntry
     {
@@ -21,11 +20,7 @@ namespace Log4Merge.Domain
                    new Regex(Pattern, RegexOptions.IgnoreCase).IsMatch(text);
         }
 
-        public HighlightEntry(
-            string pattern,
-            Color backColor,
-            Color foreColor
-        )
+        public HighlightEntry(string pattern, Color backColor, Color foreColor)
         {
             Pattern = pattern;
             BackColor = backColor;

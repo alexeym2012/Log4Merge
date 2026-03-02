@@ -1,7 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Log4Merge.Domain;
+using Log4Merge.Domain.Models;
 using Log4Merge.Properties;
 
 namespace Log4Merge

@@ -1,21 +1,13 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Log4Merge.Domain
+namespace Log4Merge.Domain.Models
 {
-    public class ColorJsonConverter: JsonConverter<Color>
+    public class ColorJsonConverter : JsonConverter<Color>
     {
         public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer)
         {
-            
             serializer.Serialize(writer, ColorTranslator.ToHtml(value));
         }
 

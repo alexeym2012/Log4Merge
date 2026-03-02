@@ -1,4 +1,4 @@
-﻿using Log4Merge.Domain;
+﻿using Log4Merge.Domain.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

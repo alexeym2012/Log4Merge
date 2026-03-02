@@ -48,10 +48,11 @@ namespace Log4Merge
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.saveFilteredRowsAsLog4NetContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabelLines = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelHighlighted = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelSpan = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelFiles = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelLines = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelSpacer = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,6 +70,7 @@ namespace Log4Merge
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contributeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.filtersToggleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterDebounceTimer = new System.Windows.Forms.Timer(this.components);
             this.gridLogsViewer = new System.Windows.Forms.DataGridView();
             this.lblLevel = new System.Windows.Forms.Label();
@@ -96,18 +98,17 @@ namespace Log4Merge
             this.filterSearchRowFlow = new System.Windows.Forms.FlowLayoutPanel();
             this.filterLevelFlow = new System.Windows.Forms.FlowLayoutPanel();
             this.filterTimeFlow = new System.Windows.Forms.FlowLayoutPanel();
-            this.filtersToggleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxGridMenu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).BeginInit();
+            this.tableLayoutPanel1.SuspendLayout();
             this.filterOverlayPanel.SuspendLayout();
             this.filterOverlayInnerTable.SuspendLayout();
             this.filterHeaderTable.SuspendLayout();
             this.filterSearchRowFlow.SuspendLayout();
             this.filterLevelFlow.SuspendLayout();
             this.filterTimeFlow.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClearFilter
@@ -227,24 +228,18 @@ namespace Log4Merge
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabelLines,
             this.toolStripStatusLabelHighlighted,
             this.toolStripStatusLabelSpan,
             this.toolStripStatusLabelFiles,
-            this.toolStripProgressBar});
+            this.toolStripStatusLabelLines,
+            this.toolStripProgressBar,
+            this.toolStripStatusLabelSpacer});
             this.statusStrip1.Location = new System.Drawing.Point(0, 1172);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
             this.statusStrip1.Size = new System.Drawing.Size(1432, 22);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripStatusLabelLines
-            // 
-            this.toolStripStatusLabelLines.Name = "toolStripStatusLabelLines";
-            this.toolStripStatusLabelLines.Size = new System.Drawing.Size(1364, 17);
-            this.toolStripStatusLabelLines.Spring = true;
-            this.toolStripStatusLabelLines.Text = "Lines: 0";
             // 
             // toolStripStatusLabelHighlighted
             // 
@@ -263,6 +258,18 @@ namespace Log4Merge
             this.toolStripStatusLabelFiles.Name = "toolStripStatusLabelFiles";
             this.toolStripStatusLabelFiles.Size = new System.Drawing.Size(19, 17);
             this.toolStripStatusLabelFiles.Text = "—";
+            // 
+            // toolStripStatusLabelLines
+            // 
+            this.toolStripStatusLabelSpacer.Name = "toolStripStatusLabelSpacer";
+            this.toolStripStatusLabelSpacer.Size = new System.Drawing.Size(19, 17);
+            this.toolStripStatusLabelSpacer.Spring = true;
+            //
+            // toolStripStatusLabelLines
+            //
+            this.toolStripStatusLabelLines.Name = "toolStripStatusLabelLines";
+            this.toolStripStatusLabelLines.Size = new System.Drawing.Size(46, 17);
+            this.toolStripStatusLabelLines.Text = "Lines: 0";
             // 
             // toolStripProgressBar
             // 
@@ -401,6 +408,14 @@ namespace Log4Merge
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
+            // filtersToggleMenuItem
+            // 
+            this.filtersToggleMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.filtersToggleMenuItem.Name = "filtersToggleMenuItem";
+            this.filtersToggleMenuItem.Size = new System.Drawing.Size(63, 20);
+            this.filtersToggleMenuItem.Text = "Filters ▾";
+            this.filtersToggleMenuItem.Click += new System.EventHandler(this.filtersToggleMenuItem_Click);
+            // 
             // filterDebounceTimer
             // 
             this.filterDebounceTimer.Interval = 400;
@@ -424,36 +439,17 @@ namespace Log4Merge
             this.gridLogsViewer.DefaultCellStyle = dataGridViewCellStyle2;
             this.gridLogsViewer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridLogsViewer.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.gridLogsViewer.Location = new System.Drawing.Point(0, 197);
+            this.gridLogsViewer.Location = new System.Drawing.Point(0, 24);
             this.gridLogsViewer.Margin = new System.Windows.Forms.Padding(0);
             this.gridLogsViewer.Name = "gridLogsViewer";
             this.gridLogsViewer.ReadOnly = true;
             this.gridLogsViewer.RowHeadersWidth = 51;
             this.gridLogsViewer.RowTemplate.Height = 24;
-            this.gridLogsViewer.Size = new System.Drawing.Size(1432, 997);
+            this.gridLogsViewer.Size = new System.Drawing.Size(1432, 1170);
             this.gridLogsViewer.TabIndex = 1;
             this.gridLogsViewer.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridLogsViewer_CellClick);
             this.gridLogsViewer.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridLogsViewer_CellDoubleClick);
             this.gridLogsViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gridLogsViewer_KeyDown);
-            //
-            // filterLevelFlow
-            //
-            this.filterLevelFlow.Controls.Add(this.lblLevel);
-            this.filterLevelFlow.Controls.Add(this.chkLevelError);
-            this.filterLevelFlow.Controls.Add(this.chkLevelFatal);
-            this.filterLevelFlow.Controls.Add(this.chkLevelWarn);
-            this.filterLevelFlow.Controls.Add(this.chkLevelInfo);
-            this.filterLevelFlow.Controls.Add(this.chkLevelDebug);
-            this.filterLevelFlow.Controls.Add(this.chkLevelTrace);
-            this.filterLevelFlow.Controls.Add(this.chkLevelOther);
-            this.filterLevelFlow.AutoSize = true;
-            this.filterLevelFlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterLevelFlow.Margin = new System.Windows.Forms.Padding(0);
-            this.filterLevelFlow.Name = "filterLevelFlow";
-            this.filterLevelFlow.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
-            this.filterLevelFlow.Size = new System.Drawing.Size(346, 58);
-            this.filterLevelFlow.TabIndex = 11;
-            this.filterLevelFlow.WrapContents = true;
             // 
             // lblLevel
             // 
@@ -541,7 +537,7 @@ namespace Log4Merge
             this.chkLevelTrace.AutoSize = true;
             this.chkLevelTrace.Checked = true;
             this.chkLevelTrace.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkLevelTrace.Location = new System.Drawing.Point(321, 5);
+            this.chkLevelTrace.Location = new System.Drawing.Point(5, 32);
             this.chkLevelTrace.Margin = new System.Windows.Forms.Padding(2);
             this.chkLevelTrace.Name = "chkLevelTrace";
             this.chkLevelTrace.Size = new System.Drawing.Size(53, 23);
@@ -555,7 +551,7 @@ namespace Log4Merge
             this.chkLevelOther.AutoSize = true;
             this.chkLevelOther.Checked = true;
             this.chkLevelOther.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkLevelOther.Location = new System.Drawing.Point(378, 5);
+            this.chkLevelOther.Location = new System.Drawing.Point(62, 32);
             this.chkLevelOther.Margin = new System.Windows.Forms.Padding(2);
             this.chkLevelOther.Name = "chkLevelOther";
             this.chkLevelOther.Size = new System.Drawing.Size(47, 23);
@@ -566,26 +562,16 @@ namespace Log4Merge
             // chkTailMode
             // 
             this.chkTailMode.AutoSize = true;
-            this.chkTailMode.Location = new System.Drawing.Point(447, 10);
+            this.chkTailMode.Location = new System.Drawing.Point(20, 193);
             this.chkTailMode.Margin = new System.Windows.Forms.Padding(20, 7, 2, 2);
             this.chkTailMode.Name = "chkTailMode";
             this.chkTailMode.Size = new System.Drawing.Size(73, 17);
             this.chkTailMode.TabIndex = 8;
             this.chkTailMode.Text = "Tail Mode";
             this.chkTailMode.CheckedChanged += new System.EventHandler(this.chkTailMode_CheckedChanged);
-            //
-            // filterSearchRowFlow
-            //
-            this.filterSearchRowFlow.Controls.Add(this.lblFilter);
-            this.filterSearchRowFlow.Controls.Add(this.btnClearFilter);
-            this.filterSearchRowFlow.AutoSize = true;
-            this.filterSearchRowFlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterSearchRowFlow.Name = "filterSearchRowFlow";
-            this.filterSearchRowFlow.Size = new System.Drawing.Size(346, 30);
-            this.filterSearchRowFlow.TabIndex = 10;
-            //
+            // 
             // lblFilter
-            //
+            // 
             this.lblFilter.AutoSize = true;
             this.lblFilter.Location = new System.Drawing.Point(3, 3);
             this.lblFilter.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
@@ -594,32 +580,17 @@ namespace Log4Merge
             this.lblFilter.TabIndex = 0;
             this.lblFilter.Text = "Search:";
             this.lblFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // filterTextBox
-            //
+            // 
             this.filterTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterTextBox.Location = new System.Drawing.Point(3, 0);
+            this.filterTextBox.Location = new System.Drawing.Point(3, 74);
             this.filterTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.filterTextBox.Name = "filterTextBox";
-            this.filterTextBox.Size = new System.Drawing.Size(340, 20);
+            this.filterTextBox.Size = new System.Drawing.Size(350, 20);
             this.filterTextBox.TabIndex = 1;
             this.filterTextBox.TextChanged += new System.EventHandler(this.filterTextBox_TextChanged);
             this.filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.filterTextBox_KeyDown);
-            //
-            // filterTimeFlow
-            //
-            this.filterTimeFlow.Controls.Add(this.lblTimeRange);
-            this.filterTimeFlow.Controls.Add(this.dtpFrom);
-            this.filterTimeFlow.Controls.Add(this.dtpTo);
-            this.filterTimeFlow.Controls.Add(this.btnClearTimeRange);
-            this.filterTimeFlow.AutoSize = true;
-            this.filterTimeFlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterTimeFlow.Margin = new System.Windows.Forms.Padding(0);
-            this.filterTimeFlow.Name = "filterTimeFlow";
-            this.filterTimeFlow.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
-            this.filterTimeFlow.Size = new System.Drawing.Size(346, 30);
-            this.filterTimeFlow.TabIndex = 12;
-            this.filterTimeFlow.WrapContents = false;
             // 
             // lblTimeRange
             // 
@@ -670,50 +641,37 @@ namespace Log4Merge
             // 
             this.tailTimer.Interval = 2000;
             this.tailTimer.Tick += new System.EventHandler(this.tailTimer_Tick);
-            //
-            // filtersToggleMenuItem
-            //
-            this.filtersToggleMenuItem.Name = "filtersToggleMenuItem";
-            this.filtersToggleMenuItem.Size = new System.Drawing.Size(80, 20);
-            this.filtersToggleMenuItem.Text = "Filters \u25be";
-            this.filtersToggleMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.filtersToggleMenuItem.Click += new System.EventHandler(this.filtersToggleMenuItem_Click);
-            //
-            // lblFiltersHeader
-            //
-            this.lblFiltersHeader.AutoSize = true;
-            this.lblFiltersHeader.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblFiltersHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFiltersHeader.Name = "lblFiltersHeader";
-            this.lblFiltersHeader.Size = new System.Drawing.Size(100, 13);
-            this.lblFiltersHeader.Text = "Filters";
-            this.lblFiltersHeader.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
-            // btnCloseFilter
-            //
-            this.btnCloseFilter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCloseFilter.Name = "btnCloseFilter";
-            this.btnCloseFilter.Size = new System.Drawing.Size(24, 24);
-            this.btnCloseFilter.TabIndex = 0;
-            this.btnCloseFilter.Text = "\u00d7";
-            this.btnCloseFilter.Click += new System.EventHandler(this.btnCloseFilter_Click);
-            //
-            // filterHeaderTable
-            //
-            this.filterHeaderTable.AutoSize = true;
-            this.filterHeaderTable.ColumnCount = 2;
-            this.filterHeaderTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.filterHeaderTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-            this.filterHeaderTable.Controls.Add(this.lblFiltersHeader, 0, 0);
-            this.filterHeaderTable.Controls.Add(this.btnCloseFilter, 1, 0);
-            this.filterHeaderTable.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterHeaderTable.Name = "filterHeaderTable";
-            this.filterHeaderTable.RowCount = 1;
-            this.filterHeaderTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.filterHeaderTable.Size = new System.Drawing.Size(346, 28);
-            //
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.gridLogsViewer, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 24, 0, 0);
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1432, 1194);
+            this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // filterOverlayPanel
+            // 
+            this.filterOverlayPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.filterOverlayPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.filterOverlayPanel.Controls.Add(this.filterOverlayInnerTable);
+            this.filterOverlayPanel.Location = new System.Drawing.Point(0, 0);
+            this.filterOverlayPanel.Name = "filterOverlayPanel";
+            this.filterOverlayPanel.Padding = new System.Windows.Forms.Padding(6);
+            this.filterOverlayPanel.Size = new System.Drawing.Size(370, 265);
+            this.filterOverlayPanel.TabIndex = 3;
+            this.filterOverlayPanel.Visible = false;
+            // 
             // filterOverlayInnerTable
-            //
+            // 
             this.filterOverlayInnerTable.ColumnCount = 1;
             this.filterOverlayInnerTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.filterOverlayInnerTable.Controls.Add(this.filterHeaderTable, 0, 0);
@@ -723,6 +681,7 @@ namespace Log4Merge
             this.filterOverlayInnerTable.Controls.Add(this.filterTimeFlow, 0, 4);
             this.filterOverlayInnerTable.Controls.Add(this.chkTailMode, 0, 5);
             this.filterOverlayInnerTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterOverlayInnerTable.Location = new System.Drawing.Point(6, 6);
             this.filterOverlayInnerTable.Name = "filterOverlayInnerTable";
             this.filterOverlayInnerTable.RowCount = 6;
             this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -732,32 +691,91 @@ namespace Log4Merge
             this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.filterOverlayInnerTable.Size = new System.Drawing.Size(356, 251);
-            //
-            // filterOverlayPanel
-            //
-            this.filterOverlayPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.filterOverlayPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.filterOverlayPanel.Controls.Add(this.filterOverlayInnerTable);
-            this.filterOverlayPanel.Name = "filterOverlayPanel";
-            this.filterOverlayPanel.Padding = new System.Windows.Forms.Padding(6);
-            this.filterOverlayPanel.Size = new System.Drawing.Size(370, 265);
-            this.filterOverlayPanel.Visible = false;
-            //
-            // tableLayoutPanel1
-            //
-            this.tableLayoutPanel1.AutoSize = true;
-            this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.gridLogsViewer, 0, 0);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 24, 0, 0);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1432, 1194);
-            this.tableLayoutPanel1.TabIndex = 0;
+            this.filterOverlayInnerTable.TabIndex = 0;
+            // 
+            // filterHeaderTable
+            // 
+            this.filterHeaderTable.AutoSize = true;
+            this.filterHeaderTable.ColumnCount = 2;
+            this.filterHeaderTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.filterHeaderTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+            this.filterHeaderTable.Controls.Add(this.lblFiltersHeader, 0, 0);
+            this.filterHeaderTable.Controls.Add(this.btnCloseFilter, 1, 0);
+            this.filterHeaderTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterHeaderTable.Location = new System.Drawing.Point(3, 3);
+            this.filterHeaderTable.Name = "filterHeaderTable";
+            this.filterHeaderTable.RowCount = 1;
+            this.filterHeaderTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterHeaderTable.Size = new System.Drawing.Size(350, 30);
+            this.filterHeaderTable.TabIndex = 0;
+            // 
+            // lblFiltersHeader
+            // 
+            this.lblFiltersHeader.AutoSize = true;
+            this.lblFiltersHeader.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblFiltersHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblFiltersHeader.Location = new System.Drawing.Point(3, 0);
+            this.lblFiltersHeader.Name = "lblFiltersHeader";
+            this.lblFiltersHeader.Size = new System.Drawing.Size(316, 30);
+            this.lblFiltersHeader.TabIndex = 0;
+            this.lblFiltersHeader.Text = "Filters";
+            this.lblFiltersHeader.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btnCloseFilter
+            // 
+            this.btnCloseFilter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCloseFilter.Location = new System.Drawing.Point(325, 3);
+            this.btnCloseFilter.Name = "btnCloseFilter";
+            this.btnCloseFilter.Size = new System.Drawing.Size(22, 24);
+            this.btnCloseFilter.TabIndex = 0;
+            this.btnCloseFilter.Text = "×";
+            this.btnCloseFilter.Click += new System.EventHandler(this.btnCloseFilter_Click);
+            // 
+            // filterSearchRowFlow
+            // 
+            this.filterSearchRowFlow.AutoSize = true;
+            this.filterSearchRowFlow.Controls.Add(this.lblFilter);
+            this.filterSearchRowFlow.Controls.Add(this.btnClearFilter);
+            this.filterSearchRowFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterSearchRowFlow.Location = new System.Drawing.Point(3, 39);
+            this.filterSearchRowFlow.Name = "filterSearchRowFlow";
+            this.filterSearchRowFlow.Size = new System.Drawing.Size(350, 30);
+            this.filterSearchRowFlow.TabIndex = 10;
+            // 
+            // filterLevelFlow
+            // 
+            this.filterLevelFlow.AutoSize = true;
+            this.filterLevelFlow.Controls.Add(this.lblLevel);
+            this.filterLevelFlow.Controls.Add(this.chkLevelError);
+            this.filterLevelFlow.Controls.Add(this.chkLevelFatal);
+            this.filterLevelFlow.Controls.Add(this.chkLevelWarn);
+            this.filterLevelFlow.Controls.Add(this.chkLevelInfo);
+            this.filterLevelFlow.Controls.Add(this.chkLevelDebug);
+            this.filterLevelFlow.Controls.Add(this.chkLevelTrace);
+            this.filterLevelFlow.Controls.Add(this.chkLevelOther);
+            this.filterLevelFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterLevelFlow.Location = new System.Drawing.Point(0, 96);
+            this.filterLevelFlow.Margin = new System.Windows.Forms.Padding(0);
+            this.filterLevelFlow.Name = "filterLevelFlow";
+            this.filterLevelFlow.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.filterLevelFlow.Size = new System.Drawing.Size(356, 57);
+            this.filterLevelFlow.TabIndex = 11;
+            // 
+            // filterTimeFlow
+            // 
+            this.filterTimeFlow.AutoSize = true;
+            this.filterTimeFlow.Controls.Add(this.lblTimeRange);
+            this.filterTimeFlow.Controls.Add(this.dtpFrom);
+            this.filterTimeFlow.Controls.Add(this.dtpTo);
+            this.filterTimeFlow.Controls.Add(this.btnClearTimeRange);
+            this.filterTimeFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterTimeFlow.Location = new System.Drawing.Point(0, 153);
+            this.filterTimeFlow.Margin = new System.Windows.Forms.Padding(0);
+            this.filterTimeFlow.Name = "filterTimeFlow";
+            this.filterTimeFlow.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.filterTimeFlow.Size = new System.Drawing.Size(356, 33);
+            this.filterTimeFlow.TabIndex = 12;
+            this.filterTimeFlow.WrapContents = false;
             // 
             // FormMainForm
             // 
@@ -782,8 +800,8 @@ namespace Log4Merge
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).EndInit();
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.filterOverlayPanel.ResumeLayout(false);
-            this.filterOverlayPanel.PerformLayout();
             this.filterOverlayInnerTable.ResumeLayout(false);
             this.filterOverlayInnerTable.PerformLayout();
             this.filterHeaderTable.ResumeLayout(false);
@@ -794,7 +812,6 @@ namespace Log4Merge
             this.filterLevelFlow.PerformLayout();
             this.filterTimeFlow.ResumeLayout(false);
             this.filterTimeFlow.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -806,6 +823,7 @@ namespace Log4Merge
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelHighlighted;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelSpan;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelFiles;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelSpacer;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;

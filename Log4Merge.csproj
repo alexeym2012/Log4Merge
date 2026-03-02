@@ -79,9 +79,7 @@
     <Compile Include="AboutWindow.Designer.cs">
       <DependentUpon>AboutWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Domain\ColorJsonConverter.cs" />
-    <Compile Include="Domain\HighlightEntry.cs" />
-    <Compile Include="Domain\LogEntry.cs" />
+    <Compile Include="Infrastructure\AppLogParserSettings.cs" />
     <Compile Include="HighlightPreferencesDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -139,6 +137,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Log4Merge.Domain\Log4Merge.Domain.csproj">
+      <Project>{D0F4A8B2-3C6E-4F9A-B1D5-7E2C8F0A4B6D}</Project>
+      <Name>Log4Merge.Domain</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

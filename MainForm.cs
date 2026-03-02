@@ -1,26 +1,49 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Log4Merge.Domain;
+using Log4Merge.Domain.Models;
+using Log4Merge.Domain.Services;
+using Log4Merge.Domain.Settings;
 using Newtonsoft.Json;
 
 namespace Log4Merge
 {
     public partial class FormMainForm : Form
     {
-        private BindingList<LogEntry> _logEntries = new BindingList<LogEntry>();
-        private string _filterText = string.Empty;
+        // #region agent log
+        private static void DebugLog(string location, string message, object data, string hypothesisId = null)
+        {
+            try
+            {
+                var logPath = Path.Combine(Environment.CurrentDirectory ?? Application.StartupPath ?? ".", "debug-1e2921.log");
+                var payload = new Dictionary<string, object>
+                {
+                    { "sessionId", "1e2921" },
+                    { "location", location },
+                    { "message", message },
+                    { "data", data },
+                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }
+                };
+                if (!string.IsNullOrEmpty(hypothesisId)) payload["hypothesisId"] = hypothesisId;
+                File.AppendAllText(logPath, JsonConvert.SerializeObject(payload) + "\n");
+            }
+            catch { }
+        }
+        // #endregion
 
+        private static readonly ILogParserSettings s_settings = new AppLogParserSettings();
+        private readonly ILogParser _logParser = new LogParser(s_settings);
+        private readonly ISessionService _sessionService = new SessionService();
+        private readonly IHighlightProfileService _highlightService = new HighlightProfileService();
+        private readonly LogRepository _repository = new LogRepository();
+
+        private string _filterText = string.Empty;
         private BindingList<HighlightEntry> _highlightEntries = new BindingList<HighlightEntry>();
 
         /// <summary>File paths passed on startup; loaded asynchronously in Shown.</summary>
@@ -31,6 +54,7 @@ namespace Log4Merge
 
         public FormMainForm(string[] args)
         {
+            LogEntry.Settings = s_settings;
             InitializeComponent();
             SetupGridColumns();
 
@@ -40,6 +64,17 @@ namespace Log4Merge
             this.DragDrop  += FormMainForm_DragDrop;
             gridLogsViewer.DragEnter += FormMainForm_DragEnter;
             gridLogsViewer.DragDrop  += FormMainForm_DragDrop;
+
+            // Make level toggle buttons visually distinct: blue = level is active/included.
+            // CheckBox.Appearance.Button checked vs unchecked is subtle on modern Windows themes,
+            // so FlatStyle.Flat + CheckedBackColor gives a clear on/off indication.
+            var levelCheckedColor = System.Drawing.Color.FromArgb(173, 214, 255);
+            foreach (var cb in new[] { chkLevelError, chkLevelFatal, chkLevelWarn,
+                                       chkLevelInfo,  chkLevelDebug, chkLevelTrace, chkLevelOther })
+            {
+                cb.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+                cb.FlatAppearance.CheckedBackColor = levelCheckedColor;
+            }
 
             this.Text = $"{this.Text} {GetAssemblyVersion()}";
 
@@ -126,69 +161,27 @@ namespace Log4Merge
             });
         }
 
-        private static string GetHighlightProfilePath()
-        {
-            var dir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "Log4Merge");
-            Directory.CreateDirectory(dir);
-            return Path.Combine(dir, "highlights.json");
-        }
-
         private void LoadHighlightProfiles()
         {
-            var path = GetHighlightProfilePath();
-            if (!File.Exists(path)) return;
-            try
-            {
-                var list = JsonConvert.DeserializeObject<List<HighlightEntry>>(File.ReadAllText(path));
-                if (list == null) return;
-                _highlightEntries.Clear();
-                foreach (var entry in list)
-                    _highlightEntries.Add(entry);
-            }
-            catch { /* corrupt file — ignore, don't crash */ }
+            var loaded = _highlightService.Load();
+            _highlightEntries.Clear();
+            foreach (var entry in loaded)
+                _highlightEntries.Add(entry);
         }
 
         private void SaveHighlightProfiles()
         {
-            try
-            {
-                File.WriteAllText(GetHighlightProfilePath(),
-                    JsonConvert.SerializeObject(_highlightEntries, Formatting.Indented));
-            }
-            catch { /* best-effort save */ }
-        }
-
-        private static string GetSessionPath()
-        {
-            var dir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "Log4Merge");
-            Directory.CreateDirectory(dir);
-            return Path.Combine(dir, "session.json");
+            _highlightService.Save(_highlightEntries);
         }
 
         private void SaveSession()
         {
-            try
-            {
-                File.WriteAllText(GetSessionPath(),
-                    JsonConvert.SerializeObject(_loadedFiles.ToArray(), Formatting.Indented));
-            }
-            catch { /* best-effort */ }
+            _sessionService.Save(_loadedFiles);
         }
 
         private async Task TryRestoreSessionAsync()
         {
-            var path = GetSessionPath();
-            if (!File.Exists(path)) return;
-            string[] saved;
-            try
-            {
-                saved = JsonConvert.DeserializeObject<string[]>(File.ReadAllText(path));
-            }
-            catch { return; }
+            var saved = _sessionService.Load();
             if (saved == null || saved.Length == 0) return;
 
             var existing = saved.Where(File.Exists).ToArray();
@@ -215,6 +208,9 @@ namespace Log4Merge
 
         private void FormMainForm_Shown(object sender, EventArgs e)
         {
+            // #region agent log
+            DebugLog("MainForm.cs:FormMainForm_Shown", "Form shown", new { hasPendingArgs = _pendingFileArgs != null && _pendingFileArgs.Length > 0 }, "A");
+            // #endregion
             LoadHighlightProfiles();
 
             if (_pendingFileArgs == null || _pendingFileArgs.Length == 0)
@@ -232,158 +228,6 @@ namespace Log4Merge
                 toolStripProgressBar.Value = p.CurrentFileIndex;
             });
             _ = LoadLogFilesAsync(files, clearExisting: true, progress, CancellationToken.None);
-        }
-
-        private struct LoadProgress
-        {
-            public int CurrentFileIndex { get; set; }
-            public int TotalFiles { get; set; }
-            public string CurrentFileName { get; set; }
-        }
-
-        /// <summary>Reads all lines from a file. Uses FileShare.ReadWrite so files in use can be opened. Tries UTF-8 (with BOM detection) first; falls back to system default encoding if that fails or yields no parseable lines.</summary>
-        private static string[] ReadAllLinesWithEncodingFallback(string logFileName)
-        {
-            Stream stream;
-            try
-            {
-                stream = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            }
-            catch (IOException)
-            {
-                stream = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            }
-            try
-            {
-                using (var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
-                {
-                    var lines = new List<string>();
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                        lines.Add(line);
-                    return lines.ToArray();
-                }
-            }
-            catch (DecoderFallbackException)
-            {
-                stream?.Dispose();
-                return File.ReadAllLines(logFileName, Encoding.Default);
-            }
-        }
-
-        /// <summary>Parses a single log file and returns entries (thread-safe, no shared state).</summary>
-        private static List<LogEntry> ParseLogFile(string logFileName)
-        {
-            var logLines = ReadAllLinesWithEncodingFallback(logFileName);
-            var entries = ParseLogLines(logFileName, logLines);
-            // If UTF-8 (or BOM) read produced no entries but file had lines, retry with system encoding (e.g. Windows-1252)
-            if (entries.Count == 0 && logLines.Length > 0)
-            {
-                try
-                {
-                    var fallbackLines = File.ReadAllLines(logFileName, Encoding.Default);
-                    entries = ParseLogLines(logFileName, fallbackLines);
-                }
-                catch (IOException) { /* use existing empty result */ }
-            }
-            return entries;
-        }
-
-        private static List<LogEntry> ParseLogLines(string logFileName, string[] logLines)
-        {
-            var entries = new List<LogEntry>();
-            LogEntry lastEntry = null;
-            var format = Properties.Settings.Default.TimeStampFormat;
-            if (string.IsNullOrEmpty(format)) format = LogEntry.DefaultTimeStampFormat;
-            var formatLen = format.Length;
-
-            for (var i = 0; i < logLines.Length; i++)
-            {
-                var logLine = logLines[i];
-                if (logLine.Length < formatLen)
-                {
-                    lastEntry?.AppendMessage(logLine);
-                }
-                else
-                {
-                    var timeString = logLine.Substring(0, formatLen);
-                    var message = logLine.Substring(formatLen);
-
-                    if (DateTime.TryParseExact(timeString, format, CultureInfo.InvariantCulture,
-                            DateTimeStyles.AssumeUniversal, out var timeStamp))
-                    {
-                        var entry = new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message);
-                        entries.Add(entry);
-                        lastEntry = entry;
-                    }
-                    else
-                    {
-                        lastEntry?.AppendMessage(logLine);
-                    }
-                }
-            }
-
-            return entries;
-        }
-
-        private void FormMainForm_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                e.Effect = DragDropEffects.Copy;
-        }
-
-        private void FormMainForm_DragDrop(object sender, DragEventArgs e)
-        {
-            var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
-            _ = HandleDroppedPathsAsync(paths);
-        }
-
-        private async Task HandleDroppedPathsAsync(string[] droppedPaths)
-        {
-            var logFiles = new System.Collections.Generic.List<string>();
-            foreach (var path in droppedPaths)
-            {
-                if (Directory.Exists(path))
-                    logFiles.AddRange(Directory.GetFiles(path, "*.log", SearchOption.TopDirectoryOnly));
-                else if (File.Exists(path))
-                    logFiles.Add(path);
-            }
-            if (logFiles.Count == 0) return;
-
-            string[] filesToLoad;
-            bool clearExisting;
-
-            if (logFiles.Count == 1)
-            {
-                filesToLoad = logFiles.ToArray();
-                clearExisting = true;
-            }
-            else
-            {
-                using (var dlg = new FileSelectionDialog(logFiles.ToArray()))
-                {
-                    if (dlg.ShowDialog(this) != DialogResult.OK) return;
-                    filesToLoad = dlg.SelectedFiles;
-                    clearExisting = dlg.ClearExisting;
-                }
-                if (filesToLoad.Length == 0) return;
-            }
-
-            var progress = new Progress<LoadProgress>(p =>
-            {
-                if (IsDisposed || !IsHandleCreated || toolStripStatusLabelLines == null || toolStripProgressBar == null)
-                    return;
-                toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
-                toolStripProgressBar.Value = p.CurrentFileIndex;
-            });
-            await LoadLogFilesAsync(filesToLoad, clearExisting, progress, CancellationToken.None);
-        }
-
-        private void AppendLogsFromTheFile(string logFileName)
-        {
-            var entries = ParseLogFile(logFileName);
-            foreach (var entry in entries)
-                _logEntries.Add(entry);
         }
 
         private async Task LoadLogFilesAsync(string[] fileNames, bool clearExisting, IProgress<LoadProgress> progress, CancellationToken cancellationToken)
@@ -416,7 +260,7 @@ namespace Log4Merge
                             var file = fileNames[i];
                             try
                             {
-                                list.AddRange(ParseLogFile(file));
+                                list.AddRange(_logParser.ParseLogFile(file));
                             }
                             catch (Exception)
                             {
@@ -439,13 +283,12 @@ namespace Log4Merge
 
                 if (clearExisting)
                 {
-                    _logEntries.Clear();
+                    _repository.Clear();
                     _loadedFiles.Clear();
                 }
                 _loadedFiles.AddRange(fileNames.Except(failedPaths));
-                foreach (var entry in collected)
-                    _logEntries.Add(entry);
-                _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
+                _repository.AddRange(collected);
+                _repository.DeduplicateAndSort();
                 BindLogViewerDataGrip();
 
                 if (chkTailMode.Checked)
@@ -464,19 +307,22 @@ namespace Log4Merge
                 toolStripProgressBar.Visible = false;
                 openLog4netLogsToolStripMenuItem.Enabled = true;
                 appendLog4netLogsToolStripMenuItem.Enabled = true;
+                // #region agent log
+                DebugLog("MainForm.cs:LoadLogFilesAsync:finally", "About to BindToolStrip after load", new { linesTextBefore = toolStripStatusLabelLines?.Text }, "A,D");
+                // #endregion
                 BindToolStrip();
             }
         }
 
         private void BindLogViewerDataGrip()
         {
-            gridLogsViewer.DataSource = _logEntries;
-            saveAsToolStripMenuItem.Enabled = saveAsLogToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetContextMenuItem.Enabled = _logEntries.Count > 0;
+            gridLogsViewer.DataSource = _repository.Entries;
+            saveAsToolStripMenuItem.Enabled = saveAsLogToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetContextMenuItem.Enabled = _repository.Entries.Count > 0;
             if (_highlightEntries.Count > 0)
             {
-                for (var i = 0; i < _logEntries.Count; i++)
+                for (var i = 0; i < _repository.Entries.Count; i++)
                 {
-                    var logEntry = _logEntries[i];
+                    var logEntry = _repository.Entries[i];
                     foreach (var highlightEntry in this._highlightEntries)
                     {
                         var message = logEntry.Message;
@@ -507,16 +353,17 @@ namespace Log4Merge
             var total = gridLogsViewer.Rows.Count;
             bool isFiltered = !string.IsNullOrWhiteSpace(_filterText) || !AreAllLevelsChecked() ||
                               (dtpFrom.Checked || dtpTo.Checked);
+            var tailPrefix = chkTailMode.Checked ? "⏩ Tail: ON  |  " : string.Empty;
             int visibleCount;
             if (isFiltered)
             {
                 visibleCount = gridLogsViewer.Rows.Cast<DataGridViewRow>().Count(r => r.Visible);
-                toolStripStatusLabelLines.Text = $"Lines: {visibleCount} / {total} (filtered)";
+                toolStripStatusLabelLines.Text = $"{tailPrefix}Lines: {visibleCount} / {total} (filtered)";
             }
             else
             {
                 visibleCount = total;
-                toolStripStatusLabelLines.Text = $"Lines: {total}";
+                toolStripStatusLabelLines.Text = $"{tailPrefix}Lines: {total}";
             }
             saveFilteredRowsAsLog4NetToolStripMenuItem.Enabled = saveFilteredRowsAsLog4NetContextMenuItem.Enabled = visibleCount > 0;
 
@@ -530,34 +377,27 @@ namespace Log4Merge
             }
 
             // Time span
-            if (_logEntries.Count == 0)
+            if (_repository.Entries.Count == 0)
                 toolStripStatusLabelSpan.Text = "Span: —";
             else
             {
-                var minTs = _logEntries.Min(e => e.TimeStamp);
-                var maxTs = _logEntries.Max(e => e.TimeStamp);
+                var minTs = _repository.Entries.Min(e => e.TimeStamp);
+                var maxTs = _repository.Entries.Max(e => e.TimeStamp);
                 const string fmt = "yyyy-MM-dd HH:mm";
                 toolStripStatusLabelSpan.Text = $"Span: {minTs.ToString(fmt)} — {maxTs.ToString(fmt)}";
             }
 
             // Source files
-            var fileCount = _logEntries.Select(e => e.SourceFileName).Distinct().Count();
-            var tailIndicator = chkTailMode.Checked ? "  |  Tail: ON" : string.Empty;
-            toolStripStatusLabelFiles.Text = $"Files: {fileCount:N0}{tailIndicator}";
-        }
+            var fileCount = _repository.Entries.Select(e => e.SourceFileName).Distinct().Count();
+            toolStripStatusLabelFiles.Text = $"Files: {fileCount:N0}";
 
-        private bool IsLevelVisible(string logLevel)
-        {
-            switch (logLevel)
-            {
-                case "ERROR": return chkLevelError.Checked;
-                case "FATAL": return chkLevelFatal.Checked;
-                case "WARN":  return chkLevelWarn.Checked;
-                case "INFO":  return chkLevelInfo.Checked;
-                case "DEBUG": return chkLevelDebug.Checked;
-                case "TRACE": return chkLevelTrace.Checked;
-                default:      return chkLevelOther.Checked;
-            }
+            // #region agent log
+            statusStrip1.PerformLayout();
+            var bounds = toolStripStatusLabelLines.Bounds;
+            DebugLog("MainForm.cs:BindToolStrip", "Status bar Lines label state",
+                new { linesText = toolStripStatusLabelLines.Text, linesVisible = toolStripStatusLabelLines.Visible, linesBoundsX = bounds.X, linesWidth = bounds.Width, statusStripWidth = statusStrip1.Width, tailChecked = chkTailMode.Checked },
+                "A,B,C");
+            // #endregion
         }
 
         private bool AreAllLevelsChecked() =>
@@ -587,10 +427,7 @@ namespace Log4Merge
                 var result = settingsForm.ShowDialog();
                 if (result == DialogResult.OK && Properties.Settings.Default.GridVisibleLineLength != prevVisibleLen)
                 {
-                    var newLen = Properties.Settings.Default.GridVisibleLineLength;
-                    if (newLen <= 0) newLen = 100;
-                    foreach (var entry in _logEntries)
-                        entry.ShortMessage = entry.Message.Length > newLen ? entry.Message.Substring(0, newLen) : entry.Message;
+                    _repository.UpdateShortMessages(Properties.Settings.Default.GridVisibleLineLength);
                     gridLogsViewer.Refresh();
                 }
             }
@@ -602,7 +439,7 @@ namespace Log4Merge
             if (hightPreferencesDialog.ShowDialog() == DialogResult.OK)
             {
                 SaveHighlightProfiles();
-                _logEntries = new BindingList<LogEntry>(_logEntries.Distinct().ToList().OrderBy(l => l.TimeStamp).ToList());
+                _repository.DeduplicateAndSort();
                 BindLogViewerDataGrip();
             }
         }
@@ -666,24 +503,7 @@ namespace Log4Merge
 
         private void menuRemoveUnhighlighted_Click(object sender, EventArgs e)
         {
-            var items = new List<LogEntry>();
-
-            if (_highlightEntries.Count > 0)
-            {
-                foreach (var logEntry in this._logEntries)
-                {
-                    foreach (var highlightEntry in this._highlightEntries)
-                    {
-                        var message = logEntry.Message;
-                        if (highlightEntry.IsMatch(message))
-                        {
-                            items.Add(logEntry);
-                        }
-                    }
-                }
-            }
-
-            _logEntries = new BindingList<LogEntry>(items.Distinct().ToList());
+            _repository.KeepHighlighted(_highlightEntries);
             BindLogViewerDataGrip();
         }
 
@@ -701,40 +521,19 @@ namespace Log4Merge
         {
             if (gridLogsViewer.SelectedRows.Count > 0)
             {
-                var items = new List<LogEntry>();
-
-                foreach (DataGridViewRow selectedRow in gridLogsViewer.SelectedRows)
-                {
-                    items.Add(selectedRow.DataBoundItem as LogEntry);
-                }
-
-                _logEntries = new BindingList<LogEntry>(items.Distinct().ToList());
+                var entriesToKeep = gridLogsViewer.SelectedRows
+                    .Cast<DataGridViewRow>()
+                    .Select(r => r.DataBoundItem as LogEntry)
+                    .Where(entry => entry != null)
+                    .ToList();
+                _repository.KeepEntries(entriesToKeep);
                 BindLogViewerDataGrip();
-
             }
-
         }
 
         private void removeHighlightedToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var items = _logEntries.ToList();
-
-            if (_highlightEntries.Count > 0)
-            {
-                foreach (var logEntry in this._logEntries)
-                {
-                    foreach (var highlightEntry in this._highlightEntries)
-                    {
-                        var message = logEntry.Message;
-                        if (highlightEntry.IsMatch(message))
-                        {
-                            items.Remove(logEntry);
-                        }
-                    }
-                }
-            }
-
-            _logEntries = new BindingList<LogEntry>(items.Distinct().ToList());
+            _repository.RemoveHighlighted(_highlightEntries);
             BindLogViewerDataGrip();
         }
 
@@ -742,7 +541,7 @@ namespace Log4Merge
         {
             if (e.RowIndex > 0 && e.ColumnIndex == 6)
             {
-                //_logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message;
+                //_repository.Entries[e.RowIndex].ShortMessage = _repository.Entries[e.RowIndex].Message;
             }
         }
 
@@ -750,45 +549,25 @@ namespace Log4Merge
         {
             if (e.RowIndex > 0 && e.ColumnIndex == 6)
             {
-
-                _logEntries[e.RowIndex].ShortMessage = _logEntries[e.RowIndex].Message.Substring(0, Math.Min(_logEntries[e.RowIndex].ShortMessage.Length + 20, _logEntries[e.RowIndex].Message.Length));
+                var entry = _repository.Entries[e.RowIndex];
+                entry.ShortMessage = entry.Message.Substring(0, Math.Min(entry.ShortMessage.Length + 20, entry.Message.Length));
             }
         }
 
         private void toolStripMenuRemoveText_Click(object sender, EventArgs e)
         {
-
             var textToRemove = Microsoft.VisualBasic.Interaction.InputBox("Remove rows which contain the text:\nCan be split by '|'",
                 "Remove rows",
                 "",
                 0,
                 0);
 
-            if (string.IsNullOrWhiteSpace(textToRemove) == false)
+            if (!string.IsNullOrWhiteSpace(textToRemove))
             {
-                var logEntries = _logEntries.ToList();
-                var filteredEntries = new List<LogEntry>();
-                var removePatterns = new HashSet<string>(textToRemove.Trim().ToLower().Split('|'));
-
-                foreach (var logEntry in logEntries)
-                {
-                    bool shouldRemove = false;
-                    foreach (var removePattern in removePatterns)
-                    {
-                        if (logEntry.Message.ToLower().Contains(removePattern.Trim()))
-                        {
-                            shouldRemove = true;
-                            break;
-                        }
-                    }
-
-                    if (shouldRemove == false)
-                    {
-                        filteredEntries.Add(logEntry);
-                    }
-                }
-
-                _logEntries = new BindingList<LogEntry>(filteredEntries.Distinct().ToList());
+                var patterns = textToRemove.Trim().Split('|')
+                    .Select(p => p.Trim())
+                    .Where(p => p.Length > 0);
+                _repository.RemoveByText(patterns);
                 BindLogViewerDataGrip();
             }
         }
@@ -799,13 +578,9 @@ namespace Log4Merge
             foreach (DataGridViewCell selectedCell in gridLogsViewer.SelectedCells.OfType<DataGridViewCell>().OrderBy(r => r.RowIndex))
             {
                 if (selectedCell.ColumnIndex == 6)
-                {
-                    sb.Append(_logEntries[selectedCell.RowIndex].Message);
-                }
+                    sb.Append(_repository.Entries[selectedCell.RowIndex].Message);
                 else
-                {
                     sb.Append(selectedCell.Value);
-                }
 
                 sb.Append("\n");
             }
@@ -822,14 +597,11 @@ namespace Log4Merge
             {
                 if (saveFileDialog.FileName != "")
                 {
-                    
                     using (var writer = new StreamWriter(saveFileDialog.FileName))
                     {
-                        foreach (var l in _logEntries)
+                        foreach (var l in _repository.Entries)
                             writer.WriteLine($"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}");
                     }
-                    
-                    //File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText}|{l.SourceFileName}, Line:{l.LineNumber}|{l.Message}")));
                 }
             }
         }
@@ -845,11 +617,9 @@ namespace Log4Merge
                 {
                     using (var writer = new StreamWriter(saveFileDialog.FileName))
                     {
-                        foreach (var l in _logEntries)
+                        foreach (var l in _repository.Entries)
                             writer.WriteLine($"{l.TimeStampAsText} {l.Message}");
                     }
-
-                    //File.WriteAllText(saveFileDialog.FileName, string.Join("\n", this._logEntries.Select(l => $"{l.TimeStampAsText} {l.Message}")));
                 }
             }
         }
@@ -878,8 +648,7 @@ namespace Log4Merge
             if (gridLogsViewer.SelectedRows.Count > 0)
             {
                 var selectedLogEntry = gridLogsViewer.SelectedRows[0].DataBoundItem as LogEntry;
-
-                _logEntries = new BindingList<LogEntry>(_logEntries.Where(l => l.TimeStamp >= selectedLogEntry.TimeStamp).Distinct().OrderBy(l => l.TimeStamp).ToList());
+                _repository.RemoveBefore(selectedLogEntry.TimeStamp);
                 BindLogViewerDataGrip();
             }
         }
@@ -889,11 +658,9 @@ namespace Log4Merge
             if (gridLogsViewer.SelectedRows.Count > 0)
             {
                 var selectedLogEntry = gridLogsViewer.SelectedRows[0].DataBoundItem as LogEntry;
-
-                _logEntries = new BindingList<LogEntry>(_logEntries.Where(l => l.TimeStamp <= selectedLogEntry.TimeStamp).Distinct().OrderBy(l => l.TimeStamp).ToList());
+                _repository.RemoveAfter(selectedLogEntry.TimeStamp);
                 BindLogViewerDataGrip();
             }
-
         }
 
         private void ApplyFilter()
@@ -901,19 +668,12 @@ namespace Log4Merge
             // DataGridView throws if you hide the currently active row, so clear it first.
             gridLogsViewer.CurrentCell = null;
 
-            var patterns = string.IsNullOrWhiteSpace(_filterText)
-                ? new string[0]
-                : _filterText.ToLower().Split('|')
-                    .Select(p => p.Trim()).Where(p => p.Length > 0).ToArray();
+            var criteria = BuildFilterCriteria();
+            bool hasAnyFilter = !string.IsNullOrEmpty(criteria.FilterText) ||
+                                criteria.EnabledLevels != null ||
+                                criteria.FromUtc.HasValue || criteria.ToUtc.HasValue;
 
-            bool hasTextFilter  = patterns.Length > 0;
-            bool hasLevelFilter = !AreAllLevelsChecked();
-            bool hasTimeRangeFilter = dtpFrom.Checked || dtpTo.Checked;
-
-            DateTime? fromUtc = dtpFrom.Checked ? (DateTime?)dtpFrom.Value.ToUniversalTime() : null;
-            DateTime? toUtc   = dtpTo.Checked   ? (DateTime?)dtpTo.Value.ToUniversalTime()   : null;
-
-            if (!hasTextFilter && !hasLevelFilter && !hasTimeRangeFilter)
+            if (!hasAnyFilter)
             {
                 foreach (DataGridViewRow row in gridLogsViewer.Rows)
                     row.Visible = true;
@@ -924,15 +684,32 @@ namespace Log4Merge
             foreach (DataGridViewRow row in gridLogsViewer.Rows)
             {
                 var entry = row.DataBoundItem as LogEntry;
-                if (entry == null) { row.Visible = true; continue; }
-
-                bool textMatch  = !hasTextFilter  || patterns.Any(p => entry.Message.ToLower().Contains(p));
-                bool levelMatch = !hasLevelFilter || IsLevelVisible(entry.LogLevel);
-                bool timeInRange = (!fromUtc.HasValue || entry.TimeStamp >= fromUtc.Value) &&
-                                  (!toUtc.HasValue   || entry.TimeStamp <= toUtc.Value);
-                row.Visible = textMatch && levelMatch && timeInRange;
+                row.Visible = entry == null || LogFilter.IsMatch(entry, criteria);
             }
             UpdateFilterButtonText();
+        }
+
+        private FilterCriteria BuildFilterCriteria()
+        {
+            HashSet<string> enabledLevels = null;
+            if (!AreAllLevelsChecked())
+            {
+                enabledLevels = new HashSet<string>();
+                if (chkLevelError.Checked) enabledLevels.Add("ERROR");
+                if (chkLevelFatal.Checked) enabledLevels.Add("FATAL");
+                if (chkLevelWarn.Checked)  enabledLevels.Add("WARN");
+                if (chkLevelInfo.Checked)  enabledLevels.Add("INFO");
+                if (chkLevelDebug.Checked) enabledLevels.Add("DEBUG");
+                if (chkLevelTrace.Checked) enabledLevels.Add("TRACE");
+                if (chkLevelOther.Checked) enabledLevels.Add(""); // "" = unrecognised level ("other")
+            }
+            return new FilterCriteria
+            {
+                FilterText = _filterText,
+                EnabledLevels = enabledLevels,
+                FromUtc = dtpFrom.Checked ? (DateTime?)dtpFrom.Value.ToUniversalTime() : null,
+                ToUtc   = dtpTo.Checked   ? (DateTime?)dtpTo.Value.ToUniversalTime()   : null
+            };
         }
 
         private void btnFilter_Click(object sender, EventArgs e)
@@ -1005,7 +782,7 @@ namespace Log4Merge
         {
             int x = this.ClientSize.Width - filterOverlayPanel.Width - 4;
             int y = menuStrip1.Bottom + 4;
-            filterOverlayPanel.Location = new Point(x, y);
+            filterOverlayPanel.Location = new System.Drawing.Point(x, y);
             filterOverlayPanel.BringToFront();
         }
 
@@ -1099,7 +876,7 @@ namespace Log4Merge
                 long startPos = _tailFilePositions.TryGetValue(file, out long pos) ? pos : 0;
                 try
                 {
-                    var parsed = ParseLogFileFromPosition(file, startPos, out long newPos);
+                    var parsed = _logParser.ParseLogFileFromPosition(file, startPos, out long newPos);
                     _tailFilePositions[file] = newPos;
                     newEntries.AddRange(parsed);
                 }
@@ -1117,9 +894,7 @@ namespace Log4Merge
 
             if (newEntries.Count == 0) return;
 
-            foreach (var entry in newEntries.OrderBy(entry => entry.TimeStamp))
-                _logEntries.Add(entry);
-            _logEntries = new BindingList<LogEntry>(_logEntries.OrderBy(l => l.TimeStamp).ToList());
+            _repository.AppendAndSort(newEntries);
             BindLogViewerDataGrip();
 
             // Scroll to the last visible row
@@ -1132,64 +907,57 @@ namespace Log4Merge
                 gridLogsViewer.FirstDisplayedScrollingRowIndex = lastVisibleIndex;
         }
 
-        private static List<LogEntry> ParseLogFileFromPosition(string logFileName, long startPosition, out long newPosition)
+        private void FormMainForm_DragEnter(object sender, DragEventArgs e)
         {
-            var entries = new List<LogEntry>();
-            newPosition = startPosition;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+        }
 
-            // Try FileShare.ReadWrite first; fall back to FileShare.Read if denied
-            FileStream fs;
-            try
+        private void FormMainForm_DragDrop(object sender, DragEventArgs e)
+        {
+            var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
+            _ = HandleDroppedPathsAsync(paths);
+        }
+
+        private async Task HandleDroppedPathsAsync(string[] droppedPaths)
+        {
+            var logFiles = new List<string>();
+            foreach (var path in droppedPaths)
             {
-                fs = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                if (Directory.Exists(path))
+                    logFiles.AddRange(Directory.GetFiles(path, "*.log", SearchOption.TopDirectoryOnly));
+                else if (File.Exists(path))
+                    logFiles.Add(path);
             }
-            catch (IOException)
+            if (logFiles.Count == 0) return;
+
+            string[] filesToLoad;
+            bool clearExisting;
+
+            if (logFiles.Count == 1)
             {
-                fs = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                filesToLoad = logFiles.ToArray();
+                clearExisting = true;
             }
-
-            using (fs)
+            else
             {
-                if (fs.Length <= startPosition)
-                    return entries;
-
-                fs.Seek(startPosition, SeekOrigin.Begin);
-                var bytesToRead = (int)(fs.Length - startPosition);
-                var bytes = new byte[bytesToRead];
-                int bytesRead = fs.Read(bytes, 0, bytesToRead);
-                newPosition = startPosition + bytesRead;
-
-                var text = Encoding.UTF8.GetString(bytes, 0, bytesRead);
-                var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-                LogEntry lastEntry = null;
-                var format = Properties.Settings.Default.TimeStampFormat;
-                if (string.IsNullOrEmpty(format)) format = LogEntry.DefaultTimeStampFormat;
-                var formatLen = format.Length;
-                foreach (var logLine in lines)
+                using (var dlg = new FileSelectionDialog(logFiles.ToArray()))
                 {
-                    if (logLine.Length < formatLen)
-                    {
-                        lastEntry?.AppendMessage(logLine);
-                        continue;
-                    }
-                    var timeString = logLine.Substring(0, formatLen);
-                    var message = logLine.Substring(formatLen);
-                    if (DateTime.TryParseExact(timeString, format,
-                            CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var timeStamp))
-                    {
-                        var entry = new LogEntry(logFileName, 0, timeStamp.ToUniversalTime(), message);
-                        entries.Add(entry);
-                        lastEntry = entry;
-                    }
-                    else
-                    {
-                        lastEntry?.AppendMessage(logLine);
-                    }
+                    if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                    filesToLoad = dlg.SelectedFiles;
+                    clearExisting = dlg.ClearExisting;
                 }
+                if (filesToLoad.Length == 0) return;
             }
 
-            return entries;
+            var progress = new Progress<LoadProgress>(p =>
+            {
+                if (IsDisposed || !IsHandleCreated || toolStripStatusLabelLines == null || toolStripProgressBar == null)
+                    return;
+                toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
+                toolStripProgressBar.Value = p.CurrentFileIndex;
+            });
+            await LoadLogFilesAsync(filesToLoad, clearExisting, progress, CancellationToken.None);
         }
     }
 }
