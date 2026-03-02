@@ -52,5 +52,14 @@ namespace Log4Merge.Properties
             get { return ((string)(this["LastOpenDirectory"])); }
             set { this["LastOpenDirectory"] = value; }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int GridVisibleLineLength
+        {
+            get { return ((int)(this["GridVisibleLineLength"])); }
+            set { this["GridVisibleLineLength"] = value; }
+        }
     }
 }

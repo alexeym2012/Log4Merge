@@ -71,14 +71,6 @@ namespace Log4Merge
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.filterDebounceTimer = new System.Windows.Forms.Timer(this.components);
             this.gridLogsViewer = new System.Windows.Forms.DataGridView();
-            this.columnTimeStamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnLogLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnSourceFileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnLineNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnTimeInvisible = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnMessageInvisible = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columnMessage = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.levelFilterPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.lblLevel = new System.Windows.Forms.Label();
             this.chkLevelError = new System.Windows.Forms.CheckBox();
             this.chkLevelFatal = new System.Windows.Forms.CheckBox();
@@ -87,30 +79,39 @@ namespace Log4Merge
             this.chkLevelDebug = new System.Windows.Forms.CheckBox();
             this.chkLevelTrace = new System.Windows.Forms.CheckBox();
             this.chkLevelOther = new System.Windows.Forms.CheckBox();
-            this.filterPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.chkTailMode = new System.Windows.Forms.CheckBox();
             this.lblFilter = new System.Windows.Forms.Label();
             this.filterTextBox = new System.Windows.Forms.TextBox();
-            this.timeRangePanel = new System.Windows.Forms.FlowLayoutPanel();
             this.lblTimeRange = new System.Windows.Forms.Label();
             this.dtpFrom = new System.Windows.Forms.DateTimePicker();
             this.dtpTo = new System.Windows.Forms.DateTimePicker();
             this.btnClearTimeRange = new System.Windows.Forms.Button();
-            this.chkTailMode = new System.Windows.Forms.CheckBox();
             this.tailTimer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.filterOverlayPanel = new System.Windows.Forms.Panel();
+            this.filterOverlayInnerTable = new System.Windows.Forms.TableLayoutPanel();
+            this.filterHeaderTable = new System.Windows.Forms.TableLayoutPanel();
+            this.lblFiltersHeader = new System.Windows.Forms.Label();
+            this.btnCloseFilter = new System.Windows.Forms.Button();
+            this.filterSearchRowFlow = new System.Windows.Forms.FlowLayoutPanel();
+            this.filterLevelFlow = new System.Windows.Forms.FlowLayoutPanel();
+            this.filterTimeFlow = new System.Windows.Forms.FlowLayoutPanel();
+            this.filtersToggleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxGridMenu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).BeginInit();
-            this.levelFilterPanel.SuspendLayout();
-            this.filterPanel.SuspendLayout();
-            this.timeRangePanel.SuspendLayout();
+            this.filterOverlayPanel.SuspendLayout();
+            this.filterOverlayInnerTable.SuspendLayout();
+            this.filterHeaderTable.SuspendLayout();
+            this.filterSearchRowFlow.SuspendLayout();
+            this.filterLevelFlow.SuspendLayout();
+            this.filterTimeFlow.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClearFilter
             // 
-            this.btnClearFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClearFilter.Location = new System.Drawing.Point(53, 3);
             this.btnClearFilter.Name = "btnClearFilter";
             this.btnClearFilter.Size = new System.Drawing.Size(55, 24);
@@ -275,7 +276,8 @@ namespace Log4Merge
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
             this.toolStripMenuItem2,
-            this.aboutToolStripMenuItem});
+            this.aboutToolStripMenuItem,
+            this.filtersToggleMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
@@ -411,14 +413,6 @@ namespace Log4Merge
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.gridLogsViewer.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.gridLogsViewer.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridLogsViewer.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.columnTimeStamp,
-            this.columnLogLevel,
-            this.columnSourceFileName,
-            this.columnLineNumber,
-            this.columnTimeInvisible,
-            this.columnMessageInvisible,
-            this.columnMessage});
             this.gridLogsViewer.ContextMenuStrip = this.ctxGridMenu;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
@@ -441,95 +435,25 @@ namespace Log4Merge
             this.gridLogsViewer.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridLogsViewer_CellClick);
             this.gridLogsViewer.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridLogsViewer_CellDoubleClick);
             this.gridLogsViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gridLogsViewer_KeyDown);
-            // 
-            // columnTimeStamp
-            // 
-            this.columnTimeStamp.DataPropertyName = "TimeStampAsText";
-            this.columnTimeStamp.FillWeight = 130F;
-            this.columnTimeStamp.HeaderText = "TimeStamp";
-            this.columnTimeStamp.MinimumWidth = 6;
-            this.columnTimeStamp.Name = "columnTimeStamp";
-            this.columnTimeStamp.ReadOnly = true;
-            this.columnTimeStamp.Width = 130;
-            // 
-            // columnLogLevel
-            // 
-            this.columnLogLevel.DataPropertyName = "LogLevel";
-            this.columnLogLevel.HeaderText = "Level";
-            this.columnLogLevel.MinimumWidth = 6;
-            this.columnLogLevel.Name = "columnLogLevel";
-            this.columnLogLevel.ReadOnly = true;
-            this.columnLogLevel.Width = 55;
-            // 
-            // columnSourceFileName
-            // 
-            this.columnSourceFileName.DataPropertyName = "SourceFileName";
-            this.columnSourceFileName.HeaderText = "Source File";
-            this.columnSourceFileName.MinimumWidth = 6;
-            this.columnSourceFileName.Name = "columnSourceFileName";
-            this.columnSourceFileName.ReadOnly = true;
-            this.columnSourceFileName.Width = 125;
-            // 
-            // columnLineNumber
-            // 
-            this.columnLineNumber.DataPropertyName = "LineNumber";
-            this.columnLineNumber.FillWeight = 50F;
-            this.columnLineNumber.HeaderText = "Line";
-            this.columnLineNumber.MinimumWidth = 6;
-            this.columnLineNumber.Name = "columnLineNumber";
-            this.columnLineNumber.ReadOnly = true;
-            this.columnLineNumber.Width = 50;
-            // 
-            // columnTimeInvisible
-            // 
-            this.columnTimeInvisible.DataPropertyName = "TimeStamp";
-            this.columnTimeInvisible.FillWeight = 2F;
-            this.columnTimeInvisible.HeaderText = "columnTimeInvisible";
-            this.columnTimeInvisible.MinimumWidth = 2;
-            this.columnTimeInvisible.Name = "columnTimeInvisible";
-            this.columnTimeInvisible.ReadOnly = true;
-            this.columnTimeInvisible.Visible = false;
-            this.columnTimeInvisible.Width = 2;
-            // 
-            // columnMessageInvisible
-            // 
-            this.columnMessageInvisible.DataPropertyName = "Message";
-            this.columnMessageInvisible.HeaderText = "columnMessageInvisible";
-            this.columnMessageInvisible.MinimumWidth = 2;
-            this.columnMessageInvisible.Name = "columnMessageInvisible";
-            this.columnMessageInvisible.ReadOnly = true;
-            this.columnMessageInvisible.Visible = false;
-            this.columnMessageInvisible.Width = 2;
-            // 
-            // columnMessage
-            // 
-            this.columnMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.columnMessage.DataPropertyName = "ShortMessage";
-            this.columnMessage.HeaderText = "Log Message";
-            this.columnMessage.MaxInputLength = 200000000;
-            this.columnMessage.MinimumWidth = 6;
-            this.columnMessage.Name = "columnMessage";
-            this.columnMessage.ReadOnly = true;
-            // 
-            // levelFilterPanel
-            // 
-            this.levelFilterPanel.Controls.Add(this.lblLevel);
-            this.levelFilterPanel.Controls.Add(this.chkLevelError);
-            this.levelFilterPanel.Controls.Add(this.chkLevelFatal);
-            this.levelFilterPanel.Controls.Add(this.chkLevelWarn);
-            this.levelFilterPanel.Controls.Add(this.chkLevelInfo);
-            this.levelFilterPanel.Controls.Add(this.chkLevelDebug);
-            this.levelFilterPanel.Controls.Add(this.chkLevelTrace);
-            this.levelFilterPanel.Controls.Add(this.chkLevelOther);
-            this.levelFilterPanel.Controls.Add(this.chkTailMode);
-            this.levelFilterPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.levelFilterPanel.Location = new System.Drawing.Point(0, 81);
-            this.levelFilterPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.levelFilterPanel.Name = "levelFilterPanel";
-            this.levelFilterPanel.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
-            this.levelFilterPanel.Size = new System.Drawing.Size(1432, 58);
-            this.levelFilterPanel.TabIndex = 11;
-            this.levelFilterPanel.WrapContents = false;
+            //
+            // filterLevelFlow
+            //
+            this.filterLevelFlow.Controls.Add(this.lblLevel);
+            this.filterLevelFlow.Controls.Add(this.chkLevelError);
+            this.filterLevelFlow.Controls.Add(this.chkLevelFatal);
+            this.filterLevelFlow.Controls.Add(this.chkLevelWarn);
+            this.filterLevelFlow.Controls.Add(this.chkLevelInfo);
+            this.filterLevelFlow.Controls.Add(this.chkLevelDebug);
+            this.filterLevelFlow.Controls.Add(this.chkLevelTrace);
+            this.filterLevelFlow.Controls.Add(this.chkLevelOther);
+            this.filterLevelFlow.AutoSize = true;
+            this.filterLevelFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterLevelFlow.Margin = new System.Windows.Forms.Padding(0);
+            this.filterLevelFlow.Name = "filterLevelFlow";
+            this.filterLevelFlow.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.filterLevelFlow.Size = new System.Drawing.Size(346, 58);
+            this.filterLevelFlow.TabIndex = 11;
+            this.filterLevelFlow.WrapContents = true;
             // 
             // lblLevel
             // 
@@ -638,66 +562,64 @@ namespace Log4Merge
             this.chkLevelOther.TabIndex = 7;
             this.chkLevelOther.Text = "(other)";
             this.chkLevelOther.CheckedChanged += new System.EventHandler(this.levelButton_CheckedChanged);
-            //
+            // 
             // chkTailMode
-            //
+            // 
             this.chkTailMode.AutoSize = true;
+            this.chkTailMode.Location = new System.Drawing.Point(447, 10);
             this.chkTailMode.Margin = new System.Windows.Forms.Padding(20, 7, 2, 2);
             this.chkTailMode.Name = "chkTailMode";
+            this.chkTailMode.Size = new System.Drawing.Size(73, 17);
             this.chkTailMode.TabIndex = 8;
             this.chkTailMode.Text = "Tail Mode";
             this.chkTailMode.CheckedChanged += new System.EventHandler(this.chkTailMode_CheckedChanged);
             //
-            // tailTimer
+            // filterSearchRowFlow
             //
-            this.tailTimer.Interval = 2000;
-            this.tailTimer.Tick += new System.EventHandler(this.tailTimer_Tick);
+            this.filterSearchRowFlow.Controls.Add(this.lblFilter);
+            this.filterSearchRowFlow.Controls.Add(this.btnClearFilter);
+            this.filterSearchRowFlow.AutoSize = true;
+            this.filterSearchRowFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterSearchRowFlow.Name = "filterSearchRowFlow";
+            this.filterSearchRowFlow.Size = new System.Drawing.Size(346, 30);
+            this.filterSearchRowFlow.TabIndex = 10;
             //
-            // filterPanel
-            // 
-            this.filterPanel.Controls.Add(this.lblFilter);
-            this.filterPanel.Controls.Add(this.btnClearFilter);
-            this.filterPanel.Controls.Add(this.filterTextBox);
-            this.filterPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterPanel.Location = new System.Drawing.Point(3, 26);
-            this.filterPanel.Name = "filterPanel";
-            this.filterPanel.Size = new System.Drawing.Size(1426, 52);
-            this.filterPanel.TabIndex = 10;
-            // 
             // lblFilter
-            // 
+            //
             this.lblFilter.AutoSize = true;
-            this.lblFilter.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblFilter.Location = new System.Drawing.Point(3, 0);
+            this.lblFilter.Location = new System.Drawing.Point(3, 3);
+            this.lblFilter.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
             this.lblFilter.Name = "lblFilter";
-            this.lblFilter.Size = new System.Drawing.Size(44, 30);
+            this.lblFilter.Size = new System.Drawing.Size(44, 13);
             this.lblFilter.TabIndex = 0;
             this.lblFilter.Text = "Search:";
-            // 
+            this.lblFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
             // filterTextBox
-            // 
+            //
             this.filterTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filterTextBox.Location = new System.Drawing.Point(3, 33);
+            this.filterTextBox.Location = new System.Drawing.Point(3, 0);
+            this.filterTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.filterTextBox.Name = "filterTextBox";
-            this.filterTextBox.Size = new System.Drawing.Size(1423, 20);
+            this.filterTextBox.Size = new System.Drawing.Size(340, 20);
             this.filterTextBox.TabIndex = 1;
             this.filterTextBox.TextChanged += new System.EventHandler(this.filterTextBox_TextChanged);
             this.filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.filterTextBox_KeyDown);
-            // 
-            // timeRangePanel
-            // 
-            this.timeRangePanel.Controls.Add(this.lblTimeRange);
-            this.timeRangePanel.Controls.Add(this.dtpFrom);
-            this.timeRangePanel.Controls.Add(this.dtpTo);
-            this.timeRangePanel.Controls.Add(this.btnClearTimeRange);
-            this.timeRangePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.timeRangePanel.Location = new System.Drawing.Point(0, 139);
-            this.timeRangePanel.Margin = new System.Windows.Forms.Padding(0);
-            this.timeRangePanel.Name = "timeRangePanel";
-            this.timeRangePanel.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
-            this.timeRangePanel.Size = new System.Drawing.Size(1432, 58);
-            this.timeRangePanel.TabIndex = 12;
-            this.timeRangePanel.WrapContents = false;
+            //
+            // filterTimeFlow
+            //
+            this.filterTimeFlow.Controls.Add(this.lblTimeRange);
+            this.filterTimeFlow.Controls.Add(this.dtpFrom);
+            this.filterTimeFlow.Controls.Add(this.dtpTo);
+            this.filterTimeFlow.Controls.Add(this.btnClearTimeRange);
+            this.filterTimeFlow.AutoSize = true;
+            this.filterTimeFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterTimeFlow.Margin = new System.Windows.Forms.Padding(0);
+            this.filterTimeFlow.Name = "filterTimeFlow";
+            this.filterTimeFlow.Padding = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.filterTimeFlow.Size = new System.Drawing.Size(346, 30);
+            this.filterTimeFlow.TabIndex = 12;
+            this.filterTimeFlow.WrapContents = false;
             // 
             // lblTimeRange
             // 
@@ -744,25 +666,96 @@ namespace Log4Merge
             this.btnClearTimeRange.Text = "Clear time range";
             this.btnClearTimeRange.Click += new System.EventHandler(this.btnClearTimeRange_Click);
             // 
-            // tableLayoutPanel1
+            // tailTimer
             // 
+            this.tailTimer.Interval = 2000;
+            this.tailTimer.Tick += new System.EventHandler(this.tailTimer_Tick);
+            //
+            // filtersToggleMenuItem
+            //
+            this.filtersToggleMenuItem.Name = "filtersToggleMenuItem";
+            this.filtersToggleMenuItem.Size = new System.Drawing.Size(80, 20);
+            this.filtersToggleMenuItem.Text = "Filters \u25be";
+            this.filtersToggleMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.filtersToggleMenuItem.Click += new System.EventHandler(this.filtersToggleMenuItem_Click);
+            //
+            // lblFiltersHeader
+            //
+            this.lblFiltersHeader.AutoSize = true;
+            this.lblFiltersHeader.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblFiltersHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblFiltersHeader.Name = "lblFiltersHeader";
+            this.lblFiltersHeader.Size = new System.Drawing.Size(100, 13);
+            this.lblFiltersHeader.Text = "Filters";
+            this.lblFiltersHeader.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // btnCloseFilter
+            //
+            this.btnCloseFilter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCloseFilter.Name = "btnCloseFilter";
+            this.btnCloseFilter.Size = new System.Drawing.Size(24, 24);
+            this.btnCloseFilter.TabIndex = 0;
+            this.btnCloseFilter.Text = "\u00d7";
+            this.btnCloseFilter.Click += new System.EventHandler(this.btnCloseFilter_Click);
+            //
+            // filterHeaderTable
+            //
+            this.filterHeaderTable.AutoSize = true;
+            this.filterHeaderTable.ColumnCount = 2;
+            this.filterHeaderTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.filterHeaderTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+            this.filterHeaderTable.Controls.Add(this.lblFiltersHeader, 0, 0);
+            this.filterHeaderTable.Controls.Add(this.btnCloseFilter, 1, 0);
+            this.filterHeaderTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterHeaderTable.Name = "filterHeaderTable";
+            this.filterHeaderTable.RowCount = 1;
+            this.filterHeaderTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterHeaderTable.Size = new System.Drawing.Size(346, 28);
+            //
+            // filterOverlayInnerTable
+            //
+            this.filterOverlayInnerTable.ColumnCount = 1;
+            this.filterOverlayInnerTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.filterOverlayInnerTable.Controls.Add(this.filterHeaderTable, 0, 0);
+            this.filterOverlayInnerTable.Controls.Add(this.filterSearchRowFlow, 0, 1);
+            this.filterOverlayInnerTable.Controls.Add(this.filterTextBox, 0, 2);
+            this.filterOverlayInnerTable.Controls.Add(this.filterLevelFlow, 0, 3);
+            this.filterOverlayInnerTable.Controls.Add(this.filterTimeFlow, 0, 4);
+            this.filterOverlayInnerTable.Controls.Add(this.chkTailMode, 0, 5);
+            this.filterOverlayInnerTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filterOverlayInnerTable.Name = "filterOverlayInnerTable";
+            this.filterOverlayInnerTable.RowCount = 6;
+            this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterOverlayInnerTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.filterOverlayInnerTable.Size = new System.Drawing.Size(356, 251);
+            //
+            // filterOverlayPanel
+            //
+            this.filterOverlayPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.filterOverlayPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.filterOverlayPanel.Controls.Add(this.filterOverlayInnerTable);
+            this.filterOverlayPanel.Name = "filterOverlayPanel";
+            this.filterOverlayPanel.Padding = new System.Windows.Forms.Padding(6);
+            this.filterOverlayPanel.Size = new System.Drawing.Size(370, 265);
+            this.filterOverlayPanel.Visible = false;
+            //
+            // tableLayoutPanel1
+            //
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.timeRangePanel, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.gridLogsViewer, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.levelFilterPanel, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.filterPanel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.gridLogsViewer, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 24, 0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 5;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 1.960784F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.901961F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.901961F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.901961F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 83.33333F));
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1432, 1194);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -774,6 +767,7 @@ namespace Log4Merge
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.filterOverlayPanel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(2);
@@ -781,18 +775,25 @@ namespace Log4Merge
             this.Text = "Log4Merge";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Shown += new System.EventHandler(this.FormMainForm_Shown);
+            this.Resize += new System.EventHandler(this.FormMainForm_Resize);
             this.ctxGridMenu.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLogsViewer)).EndInit();
-            this.levelFilterPanel.ResumeLayout(false);
-            this.levelFilterPanel.PerformLayout();
-            this.filterPanel.ResumeLayout(false);
-            this.filterPanel.PerformLayout();
-            this.timeRangePanel.ResumeLayout(false);
-            this.timeRangePanel.PerformLayout();
+            this.filterOverlayPanel.ResumeLayout(false);
+            this.filterOverlayPanel.PerformLayout();
+            this.filterOverlayInnerTable.ResumeLayout(false);
+            this.filterOverlayInnerTable.PerformLayout();
+            this.filterHeaderTable.ResumeLayout(false);
+            this.filterHeaderTable.PerformLayout();
+            this.filterSearchRowFlow.ResumeLayout(false);
+            this.filterSearchRowFlow.PerformLayout();
+            this.filterLevelFlow.ResumeLayout(false);
+            this.filterLevelFlow.PerformLayout();
+            this.filterTimeFlow.ResumeLayout(false);
+            this.filterTimeFlow.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -846,7 +847,6 @@ namespace Log4Merge
         private System.Windows.Forms.DataGridViewTextBoxColumn columnTimeInvisible;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnMessageInvisible;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnMessage;
-        private System.Windows.Forms.FlowLayoutPanel levelFilterPanel;
         private System.Windows.Forms.Label lblLevel;
         private System.Windows.Forms.CheckBox chkLevelError;
         private System.Windows.Forms.CheckBox chkLevelFatal;
@@ -855,10 +855,8 @@ namespace Log4Merge
         private System.Windows.Forms.CheckBox chkLevelDebug;
         private System.Windows.Forms.CheckBox chkLevelTrace;
         private System.Windows.Forms.CheckBox chkLevelOther;
-        private System.Windows.Forms.FlowLayoutPanel filterPanel;
         private System.Windows.Forms.TextBox filterTextBox;
         private System.Windows.Forms.Label lblFilter;
-        private System.Windows.Forms.FlowLayoutPanel timeRangePanel;
         private System.Windows.Forms.Label lblTimeRange;
         private System.Windows.Forms.DateTimePicker dtpFrom;
         private System.Windows.Forms.DateTimePicker dtpTo;
@@ -866,6 +864,15 @@ namespace Log4Merge
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.CheckBox chkTailMode;
         private System.Windows.Forms.Timer tailTimer;
+        private System.Windows.Forms.Panel filterOverlayPanel;
+        private System.Windows.Forms.TableLayoutPanel filterOverlayInnerTable;
+        private System.Windows.Forms.TableLayoutPanel filterHeaderTable;
+        private System.Windows.Forms.Label lblFiltersHeader;
+        private System.Windows.Forms.Button btnCloseFilter;
+        private System.Windows.Forms.FlowLayoutPanel filterSearchRowFlow;
+        private System.Windows.Forms.FlowLayoutPanel filterLevelFlow;
+        private System.Windows.Forms.FlowLayoutPanel filterTimeFlow;
+        private System.Windows.Forms.ToolStripMenuItem filtersToggleMenuItem;
     }
 }
 

@@ -32,6 +32,7 @@ namespace Log4Merge
         public FormMainForm(string[] args)
         {
             InitializeComponent();
+            SetupGridColumns();
 
             this.AllowDrop = true;
             gridLogsViewer.AllowDrop = true;
@@ -44,6 +45,85 @@ namespace Log4Merge
 
             if (args != null && args.Length > 0)
                 _pendingFileArgs = args;
+        }
+
+        private void SetupGridColumns()
+        {
+            gridLogsViewer.AutoGenerateColumns = false;
+            gridLogsViewer.Columns.Clear();
+
+            columnTimeStamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            columnSourceFileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            columnLineNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            columnLogLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            columnTimeInvisible = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            columnMessageInvisible = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            columnMessage = new System.Windows.Forms.DataGridViewTextBoxColumn();
+
+            columnTimeStamp.DataPropertyName = "TimeStampAsText";
+            columnTimeStamp.FillWeight = 130F;
+            columnTimeStamp.HeaderText = "Timestamp";
+            columnTimeStamp.MinimumWidth = 6;
+            columnTimeStamp.Name = "columnTimeStamp";
+            columnTimeStamp.ReadOnly = true;
+            columnTimeStamp.Width = 130;
+
+            columnSourceFileName.DataPropertyName = "SourceFileName";
+            columnSourceFileName.HeaderText = "Log File";
+            columnSourceFileName.MinimumWidth = 6;
+            columnSourceFileName.Name = "columnSourceFileName";
+            columnSourceFileName.ReadOnly = true;
+            columnSourceFileName.Width = 125;
+
+            columnLineNumber.DataPropertyName = "LineNumber";
+            columnLineNumber.FillWeight = 50F;
+            columnLineNumber.HeaderText = "Line";
+            columnLineNumber.MinimumWidth = 6;
+            columnLineNumber.Name = "columnLineNumber";
+            columnLineNumber.ReadOnly = true;
+            columnLineNumber.Width = 50;
+
+            columnLogLevel.DataPropertyName = "LogLevel";
+            columnLogLevel.HeaderText = "Level";
+            columnLogLevel.MinimumWidth = 6;
+            columnLogLevel.Name = "columnLogLevel";
+            columnLogLevel.ReadOnly = true;
+            columnLogLevel.Width = 55;
+
+            columnTimeInvisible.DataPropertyName = "TimeStamp";
+            columnTimeInvisible.FillWeight = 2F;
+            columnTimeInvisible.HeaderText = "columnTimeInvisible";
+            columnTimeInvisible.MinimumWidth = 2;
+            columnTimeInvisible.Name = "columnTimeInvisible";
+            columnTimeInvisible.ReadOnly = true;
+            columnTimeInvisible.Visible = false;
+            columnTimeInvisible.Width = 2;
+
+            columnMessageInvisible.DataPropertyName = "Message";
+            columnMessageInvisible.HeaderText = "columnMessageInvisible";
+            columnMessageInvisible.MinimumWidth = 2;
+            columnMessageInvisible.Name = "columnMessageInvisible";
+            columnMessageInvisible.ReadOnly = true;
+            columnMessageInvisible.Visible = false;
+            columnMessageInvisible.Width = 2;
+
+            columnMessage.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            columnMessage.DataPropertyName = "ShortMessage";
+            columnMessage.HeaderText = "Log Message";
+            columnMessage.MaxInputLength = 200000000;
+            columnMessage.MinimumWidth = 6;
+            columnMessage.Name = "columnMessage";
+            columnMessage.ReadOnly = true;
+
+            gridLogsViewer.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                columnTimeStamp,
+                columnSourceFileName,
+                columnLineNumber,
+                columnLogLevel,
+                columnTimeInvisible,
+                columnMessageInvisible,
+                columnMessage
+            });
         }
 
         private static string GetHighlightProfilePath()
@@ -125,6 +205,8 @@ namespace Log4Merge
 
             var progress = new Progress<LoadProgress>(p =>
             {
+                if (IsDisposed || !IsHandleCreated || toolStripStatusLabelLines == null || toolStripProgressBar == null)
+                    return;
                 toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
                 toolStripProgressBar.Value = p.CurrentFileIndex;
             });
@@ -144,6 +226,8 @@ namespace Log4Merge
             _pendingFileArgs = null;
             var progress = new Progress<LoadProgress>(p =>
             {
+                if (IsDisposed || !IsHandleCreated || toolStripStatusLabelLines == null || toolStripProgressBar == null)
+                    return;
                 toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
                 toolStripProgressBar.Value = p.CurrentFileIndex;
             });
@@ -157,26 +241,75 @@ namespace Log4Merge
             public string CurrentFileName { get; set; }
         }
 
+        /// <summary>Reads all lines from a file. Uses FileShare.ReadWrite so files in use can be opened. Tries UTF-8 (with BOM detection) first; falls back to system default encoding if that fails or yields no parseable lines.</summary>
+        private static string[] ReadAllLinesWithEncodingFallback(string logFileName)
+        {
+            Stream stream;
+            try
+            {
+                stream = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            }
+            catch (IOException)
+            {
+                stream = new FileStream(logFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            try
+            {
+                using (var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                {
+                    var lines = new List<string>();
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                        lines.Add(line);
+                    return lines.ToArray();
+                }
+            }
+            catch (DecoderFallbackException)
+            {
+                stream?.Dispose();
+                return File.ReadAllLines(logFileName, Encoding.Default);
+            }
+        }
+
         /// <summary>Parses a single log file and returns entries (thread-safe, no shared state).</summary>
         private static List<LogEntry> ParseLogFile(string logFileName)
         {
-            var logLines = File.ReadAllLines(logFileName, Encoding.UTF8);
+            var logLines = ReadAllLinesWithEncodingFallback(logFileName);
+            var entries = ParseLogLines(logFileName, logLines);
+            // If UTF-8 (or BOM) read produced no entries but file had lines, retry with system encoding (e.g. Windows-1252)
+            if (entries.Count == 0 && logLines.Length > 0)
+            {
+                try
+                {
+                    var fallbackLines = File.ReadAllLines(logFileName, Encoding.Default);
+                    entries = ParseLogLines(logFileName, fallbackLines);
+                }
+                catch (IOException) { /* use existing empty result */ }
+            }
+            return entries;
+        }
+
+        private static List<LogEntry> ParseLogLines(string logFileName, string[] logLines)
+        {
             var entries = new List<LogEntry>();
             LogEntry lastEntry = null;
+            var format = Properties.Settings.Default.TimeStampFormat;
+            if (string.IsNullOrEmpty(format)) format = LogEntry.DefaultTimeStampFormat;
+            var formatLen = format.Length;
 
             for (var i = 0; i < logLines.Length; i++)
             {
                 var logLine = logLines[i];
-                if (logLine.Length < 23)
+                if (logLine.Length < formatLen)
                 {
                     lastEntry?.AppendMessage(logLine);
                 }
                 else
                 {
-                    var timeString = logLine.Substring(0, 23);
-                    var message = logLine.Substring(23);
+                    var timeString = logLine.Substring(0, formatLen);
+                    var message = logLine.Substring(formatLen);
 
-                    if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff", CultureInfo.InvariantCulture,
+                    if (DateTime.TryParseExact(timeString, format, CultureInfo.InvariantCulture,
                             DateTimeStyles.AssumeUniversal, out var timeStamp))
                     {
                         var entry = new LogEntry(logFileName, i + 1, timeStamp.ToUniversalTime(), message);
@@ -238,6 +371,8 @@ namespace Log4Merge
 
             var progress = new Progress<LoadProgress>(p =>
             {
+                if (IsDisposed || !IsHandleCreated || toolStripStatusLabelLines == null || toolStripProgressBar == null)
+                    return;
                 toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
                 toolStripProgressBar.Value = p.CurrentFileIndex;
             });
@@ -445,10 +580,19 @@ namespace Log4Merge
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var prevVisibleLen = Properties.Settings.Default.GridVisibleLineLength;
             using (var settingsForm = new SettingsForm())
             {
                 settingsForm.Owner = this;
-                settingsForm.ShowDialog();
+                var result = settingsForm.ShowDialog();
+                if (result == DialogResult.OK && Properties.Settings.Default.GridVisibleLineLength != prevVisibleLen)
+                {
+                    var newLen = Properties.Settings.Default.GridVisibleLineLength;
+                    if (newLen <= 0) newLen = 100;
+                    foreach (var entry in _logEntries)
+                        entry.ShortMessage = entry.Message.Length > newLen ? entry.Message.Substring(0, newLen) : entry.Message;
+                    gridLogsViewer.Refresh();
+                }
             }
         }
 
@@ -489,6 +633,8 @@ namespace Log4Merge
 
             var progress = new Progress<LoadProgress>(p =>
             {
+                if (IsDisposed || !IsHandleCreated || toolStripStatusLabelLines == null || toolStripProgressBar == null)
+                    return;
                 toolStripStatusLabelLines.Text = $"Loading {p.CurrentFileIndex} of {p.TotalFiles} files...";
                 toolStripProgressBar.Value = p.CurrentFileIndex;
             });
@@ -771,6 +917,7 @@ namespace Log4Merge
             {
                 foreach (DataGridViewRow row in gridLogsViewer.Rows)
                     row.Visible = true;
+                UpdateFilterButtonText();
                 return;
             }
 
@@ -785,6 +932,7 @@ namespace Log4Merge
                                   (!toUtc.HasValue   || entry.TimeStamp <= toUtc.Value);
                 row.Visible = textMatch && levelMatch && timeInRange;
             }
+            UpdateFilterButtonText();
         }
 
         private void btnFilter_Click(object sender, EventArgs e)
@@ -853,10 +1001,54 @@ namespace Log4Merge
             BindToolStrip();
         }
 
+        private void RepositionFilterPanel()
+        {
+            int x = this.ClientSize.Width - filterOverlayPanel.Width - 4;
+            int y = menuStrip1.Bottom + 4;
+            filterOverlayPanel.Location = new Point(x, y);
+            filterOverlayPanel.BringToFront();
+        }
+
+        private void filtersToggleMenuItem_Click(object sender, EventArgs e)
+        {
+            filterOverlayPanel.Visible = !filterOverlayPanel.Visible;
+            if (filterOverlayPanel.Visible)
+            {
+                RepositionFilterPanel();
+                filterTextBox.Focus();
+                filterTextBox.SelectAll();
+            }
+        }
+
+        private void btnCloseFilter_Click(object sender, EventArgs e)
+        {
+            filterOverlayPanel.Visible = false;
+        }
+
+        private void FormMainForm_Resize(object sender, EventArgs e)
+        {
+            if (filterOverlayPanel.Visible)
+                RepositionFilterPanel();
+        }
+
+        private void UpdateFilterButtonText()
+        {
+            int active = 0;
+            if (!string.IsNullOrEmpty(_filterText)) active++;
+            if (!AreAllLevelsChecked()) active++;
+            if (dtpFrom.Checked || dtpTo.Checked) active++;
+            filtersToggleMenuItem.Text = active > 0 ? $"Filters ({active}) \u25be" : "Filters \u25be";
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == (Keys.Control | Keys.F))
             {
+                if (!filterOverlayPanel.Visible)
+                {
+                    filterOverlayPanel.Visible = true;
+                    RepositionFilterPanel();
+                }
                 filterTextBox.Focus();
                 filterTextBox.SelectAll();
                 return true;
@@ -971,16 +1163,19 @@ namespace Log4Merge
                 var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                 LogEntry lastEntry = null;
+                var format = Properties.Settings.Default.TimeStampFormat;
+                if (string.IsNullOrEmpty(format)) format = LogEntry.DefaultTimeStampFormat;
+                var formatLen = format.Length;
                 foreach (var logLine in lines)
                 {
-                    if (logLine.Length < 23)
+                    if (logLine.Length < formatLen)
                     {
                         lastEntry?.AppendMessage(logLine);
                         continue;
                     }
-                    var timeString = logLine.Substring(0, 23);
-                    var message = logLine.Substring(23);
-                    if (DateTime.TryParseExact(timeString, @"yyyy-MM-dd HH:mm:ss,fff",
+                    var timeString = logLine.Substring(0, formatLen);
+                    var message = logLine.Substring(formatLen);
+                    if (DateTime.TryParseExact(timeString, format,
                             CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var timeStamp))
                     {
                         var entry = new LogEntry(logFileName, 0, timeStamp.ToUniversalTime(), message);

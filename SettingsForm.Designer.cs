@@ -22,11 +22,14 @@ namespace Log4Merge
             this.txtTimeStampFormat = new System.Windows.Forms.TextBox();
             this.lblLevelRegex = new System.Windows.Forms.Label();
             this.txtLevelRegex = new System.Windows.Forms.TextBox();
+            this.lblParseLineLength = new System.Windows.Forms.Label();
+            this.nudParseLineLength = new System.Windows.Forms.NumericUpDown();
             this.flowLayoutPanelButtons = new System.Windows.Forms.FlowLayoutPanel();
             this.btnReset = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOk = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudParseLineLength)).BeginInit();
             this.flowLayoutPanelButtons.SuspendLayout();
             this.SuspendLayout();
             //
@@ -38,18 +41,22 @@ namespace Log4Merge
             this.tableLayoutPanel1.Controls.Add(this.txtTimeStampFormat, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.lblLevelRegex, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.txtLevelRegex, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanelButtons, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.lblParseLineLength, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.nudParseLineLength, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanelButtons, 0, 6);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(12);
-            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(484, 261);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(484, 311);
             this.tableLayoutPanel1.TabIndex = 0;
             //
             // lblTimeStampFormat
@@ -90,6 +97,23 @@ namespace Log4Merge
             this.txtLevelRegex.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLevelRegex.Size = new System.Drawing.Size(454, 127);
             this.txtLevelRegex.TabIndex = 3;
+            //
+            // lblParseLineLength
+            //
+            this.lblParseLineLength.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblParseLineLength.AutoSize = true;
+            this.lblParseLineLength.Name = "lblParseLineLength";
+            this.lblParseLineLength.Text = "Visible line length:";
+            //
+            // nudParseLineLength
+            //
+            this.nudParseLineLength.Anchor = ((System.Windows.Forms.AnchorStyles)(
+                (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left |
+                 System.Windows.Forms.AnchorStyles.Right)));
+            this.nudParseLineLength.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nudParseLineLength.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            this.nudParseLineLength.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            this.nudParseLineLength.Name = "nudParseLineLength";
             //
             // flowLayoutPanelButtons
             //
@@ -139,7 +163,7 @@ namespace Log4Merge
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(484, 261);
+            this.ClientSize = new System.Drawing.Size(484, 311);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -152,6 +176,7 @@ namespace Log4Merge
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SettingsForm_FormClosing);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudParseLineLength)).EndInit();
             this.flowLayoutPanelButtons.ResumeLayout(false);
             this.ResumeLayout(false);
         }
@@ -167,5 +192,7 @@ namespace Log4Merge
         private System.Windows.Forms.Button btnReset;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnOk;
+        private System.Windows.Forms.Label lblParseLineLength;
+        private System.Windows.Forms.NumericUpDown nudParseLineLength;
     }
 }

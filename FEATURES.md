@@ -44,7 +44,7 @@ Add export options that produce structured output:
 - **CSV**: proper RFC 4180 CSV with headers
 
 ## 12. [Impemented]Status Bar Enhancements
-Show additional stats in the status strip:
+Show additional stats in the status strip: 
 - Count of currently highlighted rows (e.g., "Highlighted: 42 / 1,203")
 - Time span of loaded logs (earliest to latest timestamp)
 - Number of source files loaded

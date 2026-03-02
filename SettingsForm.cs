@@ -20,12 +20,16 @@ namespace Log4Merge
 
             var pattern = Settings.Default.LevelRegexPattern;
             txtLevelRegex.Text = string.IsNullOrEmpty(pattern) ? LogEntry.DefaultLevelRegexPattern : pattern;
+
+            var parseLen = Settings.Default.GridVisibleLineLength;
+            nudParseLineLength.Value = parseLen > 0 ? parseLen : 100;
         }
 
         private void btnReset_Click(object sender, EventArgs e)
         {
             txtTimeStampFormat.Text = LogEntry.DefaultTimeStampFormat;
             txtLevelRegex.Text = LogEntry.DefaultLevelRegexPattern;
+            nudParseLineLength.Value = 100;
         }
 
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -75,6 +79,7 @@ namespace Log4Merge
 
             Settings.Default.TimeStampFormat = format;
             Settings.Default.LevelRegexPattern = pattern;
+            Settings.Default.GridVisibleLineLength = (int)nudParseLineLength.Value;
             Settings.Default.Save();
             return true;
         }

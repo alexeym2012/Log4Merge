@@ -13,11 +13,12 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 - [Drag & Drop](#drag--drop)
 - [Session Restore](#session-restore)
 - [The Log Viewer Grid](#the-log-viewer-grid)
+- [Filters Panel](#filters-panel)
 - [Log Level Filter](#log-level-filter)
 - [Live Search / Filter Bar](#live-search--filter-bar)
 - [Time Range Filter](#time-range-filter)
-- [Text Highlighting](#text-highlighting)
 - [Auto-Refresh / Tail Mode](#auto-refresh--tail-mode)
+- [Text Highlighting](#text-highlighting)
 - [Row Removal (Destructive Filters)](#row-removal-destructive-filters)
 - [Saving Results](#saving-results)
 - [Copying to Clipboard](#copying-to-clipboard)
@@ -34,7 +35,7 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 1. Launch `Log4Merge.exe`
 2. **File → Open Log4net logs…** — pick one or more `.log` files
 3. All lines merge into a single grid, sorted by timestamp
-4. Use the **Search bar** at the top to filter live, or right-click rows to remove noise
+4. Click **Filters ▾** (top-right of the menu bar) to open the filter panel — search, level toggles, time range, and Tail Mode are all there
 5. Highlight rules from your last session are restored automatically on startup
 
 ---
@@ -46,7 +47,6 @@ Log4Merge is a lightweight Windows desktop tool for developers and support engin
 | **File → Open Log4net logs…** | Clears current view and loads selected files |
 | **File → Append Log4net logs…** | Adds files on top of what is already loaded (good for incremental analysis) |
 | **Command-line arguments** | `Log4Merge.exe app1.log app2.log` — files load on startup |
-| **Windows Shell Extension** | Right-click any `.log` file in Explorer → *Open with Log4Merge* |
 | **Drag & Drop** | Drop `.log` files or a folder onto the window — see [Drag & Drop](#drag--drop) |
 
 After loading, entries are automatically **deduplicated** (identical timestamp + message pairs from overlapping files are merged) and **sorted chronologically**.
@@ -102,35 +102,50 @@ The grid supports **multi-row selection** (click + Shift/Ctrl) which is used by 
 
 ---
 
+## Filters Panel
+
+All non-destructive filters live in a floating **Filters** panel that hovers over the top-right corner of the grid.
+
+**Open / close** the panel by clicking **Filters ▾** in the menu bar (right-aligned), or press **Ctrl+F**. Close it with the **×** button in the panel header or by clicking **Filters ▾** again.
+
+The panel contains (top to bottom):
+
+| Section | Description |
+|---|---|
+| **Text search** | Search box + Clear button — hides non-matching rows as you type |
+| **Log level toggles** | Checkboxes for ERROR, FATAL, WARN, INFO, DEBUG, TRACE, other |
+| **Time range** | From / To date-time pickers + Clear button |
+| **Tail Mode** | Checkbox to enable live file watching |
+
+When one or more filters are active the menu item badge updates — e.g. **Filters (2) ▾** — so you always know filters are in effect even when the panel is closed.
+
+All filters are non-destructive: they hide rows without removing them from the underlying data, and they all combine with each other (AND logic).
+
+---
+
 ## Log Level Filter
 
-A toolbar below the search bar contains toggle buttons for each severity level:
+Inside the Filters panel, a row of checkboxes lets you toggle visibility by severity level:
 
 ```
 [ERROR] [FATAL] [WARN] [INFO] [DEBUG] [TRACE] [other]
 ```
 
-- Click a button to **hide** all rows at that level; click again to **show** them
+- Uncheck a level to **hide** all rows at that level; check it again to **show** them
 - **other** covers entries where no recognisable level was detected
-- The level filter is **ANDed** with the text search filter — both must match for a row to be visible
-- This filter is non-destructive: toggling levels never removes rows from the underlying data
+- The level filter combines with the text search and time range filters — all active filters must match for a row to be visible
 
 ---
 
 ## Live Search / Filter Bar
 
-A non-destructive search bar sits above the grid. Rows are **hidden**, not deleted — the underlying data is always preserved.
-
-```
-Search: [________________________] [Filter] [Clear]
-```
+Inside the Filters panel, a text box provides non-destructive search. Rows are **hidden**, not deleted — the underlying data is always preserved.
 
 ### How it works
 
 - **Auto-applies as you type** with a 400 ms debounce — no button press needed
-- **Filter button** or **Enter** applies the filter immediately
-- **Clear button** or **Escape** removes the filter and shows all rows
-- **Ctrl+F** focuses the search box from anywhere in the app
+- **Clear button** removes the filter and shows all rows
+- **Ctrl+F** opens the Filters panel and focuses the search box
 
 ### Multi-pattern search
 
@@ -144,13 +159,26 @@ NullReferenceException|timeout|connection refused
 
 ## Time Range Filter
 
-Two date/time pickers in the toolbar let you narrow the visible rows to a specific window of time without deleting anything.
+Inside the Filters panel, two date/time pickers let you narrow the visible rows to a specific window of time without deleting anything.
 
 - Set a **From** and/or **To** date/time to hide rows outside that range
 - Click **Clear** to remove the range and show all rows again
-- The time range filter is non-destructive and combines with the text and level filters
+- Combines with the text and level filters
 
 This complements the destructive **Remove Before/After Selected** context menu operations — use the time range filter when you want to explore a window without committing to a removal.
+
+---
+
+## Auto-Refresh / Tail Mode
+
+Enable **Tail Mode** via the checkbox at the bottom of the Filters panel to watch the loaded log files for new content in real time.
+
+- When active, a `FileSystemWatcher` monitors every loaded file for changes
+- New lines appended to any file are parsed and added to the grid automatically
+- The status bar shows when Tail Mode is active
+- Uncheck the checkbox to stop watching
+
+Tail Mode is useful when monitoring a running application — load the log files once, enable Tail Mode, and watch new entries appear without reloading.
 
 ---
 
@@ -180,19 +208,6 @@ The pattern list renders each entry using its own colors so you can see exactly 
 Highlight rules are **automatically saved** to `%APPDATA%\Log4Merge\highlights.json` every time you close the Highlighting dialog with OK. They are **automatically restored** the next time you launch the app — no manual import needed.
 
 Profiles can still be exported and imported manually to share rules across machines.
-
----
-
-## Auto-Refresh / Tail Mode
-
-Enable **Tail Mode** from the toolbar to watch the loaded log files for new content in real time.
-
-- When active, a `FileSystemWatcher` monitors every loaded file for changes
-- New lines appended to any file are parsed and added to the grid automatically
-- The status bar shows when Tail Mode is active
-- Click the toggle again to stop watching
-
-Tail Mode is useful when monitoring a running application — load the log files once, enable Tail Mode, and watch new entries appear without reloading.
 
 ---
 
@@ -274,9 +289,8 @@ The status strip at the bottom shows live metrics for the current view:
 
 | Shortcut | Action |
 |---|---|
-| `Ctrl+F` | Focus the Search bar and select all text |
-| `Enter` (in Search bar) | Apply filter immediately |
-| `Escape` (in Search bar) | Clear filter and show all rows |
+| `Ctrl+F` | Open the Filters panel (if hidden) and focus the search box |
+| `Escape` (in search box) | Clear the text filter |
 | `Delete` (in grid) | Remove all selected rows |
 
 ---

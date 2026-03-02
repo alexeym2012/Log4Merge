@@ -80,12 +80,9 @@ namespace Log4Merge.Domain
                 ? (m.Groups[1].Value.ToUpper() == "WARNING" ? "WARN" : m.Groups[1].Value.ToUpper())
                 : "";
 
-            ShortMessage = Message;
-
-            if (Message.Length > 100)
-            {
-                ShortMessage = Message.Substring(0, 100);
-            }
+            var visibleLen = Log4Merge.Properties.Settings.Default.GridVisibleLineLength;
+            if (visibleLen <= 0) visibleLen = 100;
+            ShortMessage = Message.Length > visibleLen ? Message.Substring(0, visibleLen) : Message;
 
         }
 

@@ -15,5 +15,9 @@
     <Setting Name="LastOpenDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)"></Value>
     </Setting>
+    <Setting Name="GridVisibleLineLength" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+      <DefaultValue>100</DefaultValue>
+    </Setting>
   </Settings>
 </SettingsFile>
