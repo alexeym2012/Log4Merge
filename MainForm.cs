@@ -10,33 +10,11 @@ using System.Windows.Forms;
 using Log4Merge.Domain.Models;
 using Log4Merge.Domain.Services;
 using Log4Merge.Domain.Settings;
-using Newtonsoft.Json;
 
 namespace Log4Merge
 {
     public partial class FormMainForm : Form
     {
-        // #region agent log
-        private static void DebugLog(string location, string message, object data, string hypothesisId = null)
-        {
-            try
-            {
-                var logPath = Path.Combine(Environment.CurrentDirectory ?? Application.StartupPath ?? ".", "debug-1e2921.log");
-                var payload = new Dictionary<string, object>
-                {
-                    { "sessionId", "1e2921" },
-                    { "location", location },
-                    { "message", message },
-                    { "data", data },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }
-                };
-                if (!string.IsNullOrEmpty(hypothesisId)) payload["hypothesisId"] = hypothesisId;
-                File.AppendAllText(logPath, JsonConvert.SerializeObject(payload) + "\n");
-            }
-            catch { }
-        }
-        // #endregion
-
         private static readonly ILogParserSettings s_settings = new AppLogParserSettings();
         private readonly ILogParser _logParser = new LogParser(s_settings);
         private readonly ISessionService _sessionService = new SessionService();
@@ -208,9 +186,6 @@ namespace Log4Merge
 
         private void FormMainForm_Shown(object sender, EventArgs e)
         {
-            // #region agent log
-            DebugLog("MainForm.cs:FormMainForm_Shown", "Form shown", new { hasPendingArgs = _pendingFileArgs != null && _pendingFileArgs.Length > 0 }, "A");
-            // #endregion
             LoadHighlightProfiles();
 
             if (_pendingFileArgs == null || _pendingFileArgs.Length == 0)
@@ -307,9 +282,6 @@ namespace Log4Merge
                 toolStripProgressBar.Visible = false;
                 openLog4netLogsToolStripMenuItem.Enabled = true;
                 appendLog4netLogsToolStripMenuItem.Enabled = true;
-                // #region agent log
-                DebugLog("MainForm.cs:LoadLogFilesAsync:finally", "About to BindToolStrip after load", new { linesTextBefore = toolStripStatusLabelLines?.Text }, "A,D");
-                // #endregion
                 BindToolStrip();
             }
         }
@@ -390,14 +362,6 @@ namespace Log4Merge
             // Source files
             var fileCount = _repository.Entries.Select(e => e.SourceFileName).Distinct().Count();
             toolStripStatusLabelFiles.Text = $"Files: {fileCount:N0}";
-
-            // #region agent log
-            statusStrip1.PerformLayout();
-            var bounds = toolStripStatusLabelLines.Bounds;
-            DebugLog("MainForm.cs:BindToolStrip", "Status bar Lines label state",
-                new { linesText = toolStripStatusLabelLines.Text, linesVisible = toolStripStatusLabelLines.Visible, linesBoundsX = bounds.X, linesWidth = bounds.Width, statusStripWidth = statusStrip1.Width, tailChecked = chkTailMode.Checked },
-                "A,B,C");
-            // #endregion
         }
 
         private bool AreAllLevelsChecked() =>
