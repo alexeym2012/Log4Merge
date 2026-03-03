@@ -95,7 +95,14 @@
     <Compile Include="FileSelectionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-<Compile Include="MainForm.cs">
+    <Compile Include="FileSelectionDialog.Designer.cs">
+      <DependentUpon>FileSelectionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MessageKind.cs" />
+    <Compile Include="ViewModels\FileSelectionViewModel.cs" />
+    <Compile Include="ViewModels\HighlightPreferencesViewModel.cs" />
+    <Compile Include="ViewModels\MainFormViewModel.cs" />
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
